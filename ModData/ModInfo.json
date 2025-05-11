@@ -5,5 +5,7 @@
   "Authors": "HordeResurrection",
   "BuiltIn": false,
   "StandAlone": false,
-  "Params": null
+  "Params": null,
+  "GameVersion": "0.76pre",
+  "ModVersion": "1.00"
 }
