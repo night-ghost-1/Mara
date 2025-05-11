@@ -1,0 +1,23 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "baseUrl": "./CoreScripts/",
+        "rootDirs": ["ModData/Scripts", "CoreScripts"],
+        "module": "es2015",
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "preserveConstEnums": true,
+        "removeComments": false,
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "target": "ES6",
+        "lib": [
+            "es2017"
+        ],
+    },
+    "include": [
+        "./**/*.ts",
+        "./**/*.d.ts"
+    ]
+}

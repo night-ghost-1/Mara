@@ -1,0 +1,9 @@
+{
+  "Uid": "#ContentPack_HordeModTemplate",
+  "DisplayName": "Horde mod template",
+  "Description": "Заготовка для мода к Орде",
+  "Authors": "HordeResurrection",
+  "BuiltIn": false,
+  "StandAlone": false,
+  "Params": null
+}
