@@ -1,10 +1,11 @@
 {
-  "Uid": "#ContentPack_HordeModTemplate",
-  "DisplayName": "Horde mod template",
-  "Description": "Заготовка для мода к Орде",
-  "Authors": "HordeResurrection",
+  "Uid": "#ContentPack_Mara",
+  "DisplayName": "Мара",
+  "Description": "Добавляет в игру ботов",
+  "Authors": "Ghost",
   "BuiltIn": false,
   "StandAlone": false,
+  "Params": null,
   "GameVersion": "0.76pre",
-  "ModVersion": "1.00"
+  "ModVersion": "2.00"
 }

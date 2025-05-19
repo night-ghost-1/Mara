@@ -1,0 +1,68 @@
+@startuml architecture
+
+skinparam ComponentStyle rectangle
+
+component Mara {
+    component SettlementControllers
+}
+
+note right
+Static class, entry point for main script
+Creates and manages settlement controllers
+end note
+
+component SettlementController {
+    component ProductionSubcontroller
+    note left of ProductionSubcontroller
+    Processes requests to 
+    build structures & train units
+    end note
+
+    component MiningSubcontroller
+    note left of MiningSubcontroller
+    Provides resource gathering
+    end note
+
+    component TacticalSubcontroller
+    note left of TacticalSubcontroller
+    Manages squads: issues attack orders and
+    pulls back damaged squads
+    end note
+
+    component StrategySubcontroller
+    note left of StrategySubcontroller
+    Calculate strategy data such as 
+    army composition for attack,
+    attack target selection, 
+    retreat locations, etc.
+    end note
+
+    ProductionSubcontroller -[hidden]down-> MiningSubcontroller
+    MiningSubcontroller -[hidden]down-> TacticalSubcontroller
+    TacticalSubcontroller -[hidden]down-> StrategySubcontroller
+
+    component CurrentState
+    
+    note bottom of CurrentState
+    Defines current grand strategy,
+    issues corresponding requests to
+    subcontrollers
+
+    (see Settlement Controller States
+    diagram for reference)
+    end note
+
+    CurrentState -left-> ProductionSubcontroller
+    CurrentState -left-> MiningSubcontroller
+    CurrentState -left-> TacticalSubcontroller
+    CurrentState -left-> StrategySubcontroller
+}
+
+note bottom of SettlementController
+Coordinates current state and subcontrollers,
+holds shared data
+end note
+
+SettlementControllers .down. SettlementController
+
+@enduml

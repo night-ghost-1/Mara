@@ -1,0 +1,38 @@
+@startuml squad states
+
+state Idle : Standing doing nothing\nstart battle if enemy is nearby
+state Move : Moving to a destination and\nignoring enemies on the way
+state Attack : Moving to a destination and\nengaging enemies on the way
+state Capture : Capture nearby machines without operators
+state GatherUp : Trying to get the squad together
+state Battle : Fighting the enemies\ntill victory or the bitter end
+state IdleGatherUp: Trying to get the squad together
+state Pullback: Moving back to location\nwhere fight started
+
+Idle --> Move: Move command received
+Idle --> Attack: Attack command received
+Idle --> Battle: Enemy is\nnearby
+Idle -> IdleGatherUp: Spread is too big
+
+Attack --> GatherUp: Squad spread is too big
+Attack --> Battle: Enemy is nearby
+Attack --> Idle: Destination reached
+Attack --> Move: Move command\nreceived
+Attack --> Capture: Capturable units nearby detected
+
+GatherUp --> Attack: Squad spread is\nacceptable
+GatherUp --> Battle: Enemy is nearby
+
+Capture --> Attack: All available units captured
+Capture --> Battle: Enemy is nearby
+
+Move --> Idle: Destination reached with\ngiven accuracy or\ntimeout expires
+
+Battle --> Attack: Enemy\ndefeated
+Battle --> Pullback: Moved too far from battle\ninitial location
+
+Pullback --> Battle: Reached initial battle location
+
+IdleGatherUp -> Idle: Spread is acceptable
+
+@enduml

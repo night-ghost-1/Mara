@@ -1,41 +1,56 @@
 import { activePlugins } from "active-plugins";
 import HordePluginBase from "plugins/base-plugin";
+import { Mara } from "./Mara";
+import { createResourcesAmount } from "library/common/primitives";
+import { isReplayMode } from "library/game-logic/game-tools";
 
-const DISPLAY_NAME = "Mod template";
+const DISPLAY_NAME = "Mara";
 
-/**
- * Место для регистрации плагинов мода.
- * Вызывается до вызова "onFirstRun()" при первом запуске скрипт-машины, а так же при hot-reload.
- */
 export function onInitialization() {
-    activePlugins.register(new ModTemplatePlugin());
+    activePlugins.register(new MaraPlugin());
 }
 
-/**
- * В этом классе содержится точка входа для выполнения скриптов мода.
- */
-class ModTemplatePlugin extends HordePluginBase {
-    startTick: number;
-
-    /**
-     * Конструктор.
-     */
+export class MaraPlugin extends HordePluginBase {
     public constructor() {
         super(DISPLAY_NAME);
-        this.startTick = DataStorage.gameTickNum;
     }
 
-    /**
-     * Метод вызывается при загрузке сцены и после hot-reload.
-     */
     public onFirstRun() {
-        // Empty
+        if (!isReplayMode()) {
+            Mara.FirstRun();
+        }
     }
 
-    /**
-     * Метод выполняется каждый игровой такт.
-     */
     public onEveryTick(gameTickNum: number) {
-        // Empty
+        this.mineResources(gameTickNum);
+        
+        if (!isReplayMode()) {
+            Mara.Tick(gameTickNum);
+        }
+    }
+
+    private mineResources(gameTickNum: number): void {
+        const RESOUCE_INCREASE_INTERVAL = 20 * 50; // 10 seconds for standard speed
+
+        if (gameTickNum % RESOUCE_INCREASE_INTERVAL > 0) {
+            return;
+        }
+
+        let resourceIncrease = createResourcesAmount(10, 10, 10, 1);
+        
+        for (let player of Players) {
+            let realPlayer = player.GetRealPlayer();
+
+            if (realPlayer.IsBot) {
+                let settlement = realPlayer.GetRealSettlement();
+                
+                if (settlement) {
+                    let settlementResources = settlement.Resources;
+                    settlementResources.AddResources(resourceIncrease);
+                }
+            }
+        }
+
+        Mara.Debug("Mined resources for all Mara controllers: " + resourceIncrease.ToString());
     }
 }

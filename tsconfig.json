@@ -3,6 +3,7 @@
         "strict": true,
         "baseUrl": "./CoreScripts/",
         "rootDirs": ["ModData/Scripts", "CoreScripts"],
+        "outDir": "jsBuild", //dummy parameter to suppress errors for .js files in VS Code
         "module": "es2015",
         "noImplicitReturns": true,
         "noImplicitThis": true,
@@ -12,6 +13,7 @@
         "sourceMap": true,
         "strictNullChecks": true,
         "target": "ES6",
+        "allowJs": true,
         "lib": [
             "es2017"
         ],
