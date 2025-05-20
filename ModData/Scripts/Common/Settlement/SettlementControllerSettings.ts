@@ -64,7 +64,6 @@ class Priorities {
     public HousingProduction: MaraPriority = MaraPriority.Normal;
     public AttackUnitsProduction: MaraPriority = MaraPriority.Normal;
     public LandmarkCaptureUnitsProduction: MaraPriority = MaraPriority.Low;
-    public PointGuardProduction: MaraPriority = MaraPriority.Low;
     public ReinforcementUnitsProduction: MaraPriority = MaraPriority.Background;
 }
 

@@ -115,7 +115,7 @@ export class MaraUtils {
     }
 
     static GetAllPlayers(): Array<{index: number, player: Player}> {
-        let result: Array<any> = [];
+        let result: Array<{index: number, player: Player}> = [];
 
         for (let i = 0; i < Players.length; i ++) {
             let player = Players[i];
@@ -167,7 +167,7 @@ export class MaraUtils {
     //#region Squads and Unit Search
     static GetSettlementsSquadsFromUnits(
         units: Array<MaraUnitCacheItem>, 
-        settlements: Array<any>,
+        settlements: Array<Settlement>,
         unitFilter?: (unit: MaraUnitCacheItem) => boolean,
         radius: number = DEFAULT_UNIT_SEARCH_RADIUS,
     ): Array<MaraSquad> {
@@ -192,7 +192,7 @@ export class MaraUtils {
     private static constructMaraSquad(
         unit: MaraUnitCacheItem,
         processedUnitIds: Set<number>, 
-        settlements: Array<any>,
+        settlements: Array<Settlement>,
         radius: number = DEFAULT_UNIT_SEARCH_RADIUS,
         unitFilter?: (unit: MaraUnitCacheItem) => boolean
     ): MaraSquad {
@@ -249,7 +249,7 @@ export class MaraUtils {
     
     static GetSettlementUnitsInArea(
         rect: MaraRect,
-        settelements?: Array<any>,
+        settelements?: Array<Settlement>,
         unitFilter?: (unit: MaraUnitCacheItem) => boolean,
         includeUnalive?: boolean
     ): Array<MaraUnitCacheItem> {

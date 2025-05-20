@@ -40,8 +40,6 @@ export class ExpandBuildState extends ProductionTaskState {
             }
             
             this.expandCenter = center;
-            this.targetExpand!.BuildCenter = center;
-
             return true;
         }
     }
