@@ -3,6 +3,7 @@ import HordePluginBase from "plugins/base-plugin";
 import { Mara } from "./Mara";
 import { createResourcesAmount } from "library/common/primitives";
 import { isReplayMode } from "library/game-logic/game-tools";
+import { LogLevel } from "library/common/logging";
 
 const DISPLAY_NAME = "Mara";
 
@@ -16,8 +17,10 @@ export class MaraPlugin extends HordePluginBase {
     }
 
     public onFirstRun() {
+        this.log.logLevel = LogLevel.Debug;
+        
         if (!isReplayMode()) {
-            Mara.FirstRun();
+            Mara.FirstRun(this.log);
         }
     }
 

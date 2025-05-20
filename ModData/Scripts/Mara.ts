@@ -1,4 +1,4 @@
-import { log } from "library/common/logging";
+import { log, Logger } from "library/common/logging";
 import { MaraSettlementController } from "./MaraSettlementController";
 import { MaraUtils } from "./MaraUtils";
 import { MaraMap } from "./Common/MapAnalysis/MaraMap";
@@ -31,9 +31,8 @@ class MaraProfilersCollection {
 export class Mara {
     private static profilers: MaraProfilersCollection = {};
     
-    static LogLevel: MaraLogLevel = MaraLogLevel.Debug;
-    static LogTickNumber: boolean = true;
     static CanRun = true;
+    static Logger: Logger;
     
     private static controllers: Array<MaraSettlementController> = [];
     private static pathfinder: PathFinder;
@@ -99,7 +98,9 @@ export class Mara {
         }
     };
 
-    static FirstRun(): void {
+    static FirstRun(logger: Logger): void {
+        Mara.Logger = logger;
+        
         Mara.Info(`Engaging Mara...`);
         Mara.Info(`Failed to load library './Empathy/heart', reason: not found. Proceeding without it.`);
         Mara.Info(`Failed to load library './Empathy/soul', reason: not found. Proceeding without it.`);
@@ -172,22 +173,20 @@ export class Mara {
 
     //#region logging helpers
     static Log(level: MaraLogLevel, message: string) {
-        if (Mara.LogLevel > level) {
-            return;
-        }
-
-        let logMessage = `(Mara)${Mara.LogTickNumber ? " [" + Mara.currentTick + "]" : ""}${level == MaraLogLevel.Debug ? " D" : ""} ${message}`;
+        let logMessage = `[${Mara.currentTick}] ${message}`;
 
         switch (level) {
             case MaraLogLevel.Debug:
+                DebugLogger.WriteLine(`D ${logMessage}`);
+                break;
             case MaraLogLevel.Info:
-                log.info(logMessage);
+                Mara.Logger.info(logMessage);
                 break;
             case MaraLogLevel.Warning:
-                log.warning(logMessage);
+                Mara.Logger.warning(logMessage);
                 break;
             case MaraLogLevel.Error:
-                log.error(logMessage);
+                Mara.Logger.error(logMessage);
                 break;
         }
     }
