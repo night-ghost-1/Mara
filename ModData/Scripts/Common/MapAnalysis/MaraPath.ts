@@ -1,4 +1,5 @@
 import { MaraUtils } from "../../MaraUtils";
+import { MaraPoint } from "../MaraPoint";
 import { MaraMapNode } from "./MaraMapNode";
 
 export class MaraPath {
@@ -19,5 +20,9 @@ export class MaraPath {
 
     public ToString(): string {
         return this.Nodes.map((n) => n.Region.Center.ToString()).join(", ");
+    }
+
+    public get Cells(): Array<MaraPoint> { // for more convenient pathfinding debug
+        return this.Nodes.map((n) => n.Region.Center);
     }
 }
