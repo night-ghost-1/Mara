@@ -28,10 +28,10 @@ class TimeoutsSettings {
     public StrategyActionSuccessMinCooldown = 5 * 50;
     public StrategyActionSuccessMaxCooldown = 20 * 50;
 
-    public StrategyActionFailReattemptMinCooldown = 20 * 50;
-    public StrategyActionFailReattemptMaxCooldown = 40 * 50;
+    public StrategyActionFailReattemptMinCooldown = 10 * 50;
+    public StrategyActionFailReattemptMaxCooldown = 30 * 50;
     
-    public StrategyActionUnavailReattemptMaxCooldown: number = 3 * 60 * 50;
+    public StrategyActionUnavailReattemptMaxCooldown: number = 2 * 60 * 50;
     public StrategyActionUnavailReattemptMinCooldown: number = 1 * 60 * 50;
 
     public DefaultTaskReattemptMaxCooldown: number = 20 * 50;
@@ -39,8 +39,8 @@ class TimeoutsSettings {
     public StrategyReInitMin = 30 * 60 * 50;
     public StrategyReInitMax = 60 * 60 * 50;
 
-    public SettlementEnhanceMinCooldown = 2 * 60 * 50;
-    public SettlementEnhanceMaxCooldown = 9 * 60 * 50;
+    public SettlementEnhanceMinCooldown = 1 * 60 * 50;
+    public SettlementEnhanceMaxCooldown = 3 * 60 * 50;
     
     public UnfinishedConstructionThreshold: number = 2 * 60 * 50;
 
