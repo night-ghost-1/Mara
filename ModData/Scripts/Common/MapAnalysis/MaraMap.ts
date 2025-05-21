@@ -78,7 +78,7 @@ export class MaraMap {
     public static ResourceClusters: Array<MaraResourceCluster>;
     public static ProcessedResourceCells: Set<string> = new Set<string>();
     
-    public static readonly WALKABLE_REGION_SIZE = 20;
+    public static readonly WALKABLE_REGION_SIZE = 10;
     public static readonly UNWALKABLE_REGION_SIZE = 4;
     public static readonly GATE_THRESHOLD = 10;
     public static readonly RESOURCE_CLUSTER_SIZE = 8;
@@ -86,9 +86,9 @@ export class MaraMap {
     private static readonly MAX_PATH_COUNT = 10;
 
     private static readonly WALKABLE_TO_WALKABLE_COST = 1;
-    private static readonly WALKABLE_TO_UNWALKABLE_COST = 10;
-    private static readonly UNWALKABLE_TO_WALKABLE_COST = 5;
-    private static readonly UNWALKABLE_TO_UNWALKABLE_COST = 20;
+    private static readonly WALKABLE_TO_UNWALKABLE_COST = 2;
+    private static readonly UNWALKABLE_TO_WALKABLE_COST = 1;
+    private static readonly UNWALKABLE_TO_UNWALKABLE_COST = 2;
 
     private static readonly REACHABLE_CELL_SEARCH_RADIUS = 5;
     
@@ -405,7 +405,7 @@ export class MaraMap {
     }
 
     private static initPathfinding(unwalkableNodeTypesToInclude: Array<TileType>): void {
-        const UNWALKABLE_NODE_INITIAL_WEIGTH = 500;
+        const UNWALKABLE_NODE_INITIAL_WEIGTH = 1;
         
         MaraMap.mapNodes.forEach((n) => {
             if (n.Type != MaraMapNodeType.Unwalkable) {
