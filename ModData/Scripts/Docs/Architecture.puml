@@ -13,23 +13,31 @@ end note
 
 component SettlementController {
     component ProductionSubcontroller
+
     note left of ProductionSubcontroller
     Processes requests to 
     build structures & train units
     end note
 
-    component MiningSubcontroller
+    component MiningSubcontroller{
+        component MiningTask
+    }
+
     note left of MiningSubcontroller
     Provides resource gathering
     end note
 
     component TacticalSubcontroller
+    
     note left of TacticalSubcontroller
     Manages squads: issues attack orders and
     pulls back damaged squads
     end note
 
-    component StrategySubcontroller
+    component StrategySubcontroller{
+        component StrategyTask
+    }
+
     note left of StrategySubcontroller
     Calculate strategy data such as 
     army composition for attack,
@@ -37,30 +45,41 @@ component SettlementController {
     retreat locations, etc.
     end note
 
+    component DevelopmentSubcontroller {
+        component DevelopmentTask
+    }
+
+    note left of DevelopmentSubcontroller
+    Is responsible for settlement development, 
+    i.e. building production buildings,
+    aux buildings like Windmills and Churches,
+    etc.
+    end note
+
     ProductionSubcontroller -[hidden]down-> MiningSubcontroller
     MiningSubcontroller -[hidden]down-> TacticalSubcontroller
     TacticalSubcontroller -[hidden]down-> StrategySubcontroller
-
-    component CurrentState
-    
-    note bottom of CurrentState
-    Defines current grand strategy,
-    issues corresponding requests to
-    subcontrollers
-
-    (see Settlement Controller States
-    diagram for reference)
-    end note
-
-    CurrentState -left-> ProductionSubcontroller
-    CurrentState -left-> MiningSubcontroller
-    CurrentState -left-> TacticalSubcontroller
-    CurrentState -left-> StrategySubcontroller
+    StrategySubcontroller -[hidden]down-> DevelopmentSubcontroller
 }
 
 note bottom of SettlementController
 Coordinates current state and subcontrollers,
 holds shared data
+
+Each Subcontroller manages its own aspect of
+settlement life, see notes. Can contain an
+object 'Task' inside, which purpose is to
+do certain work like attack other settlement,
+build defences, unlock certain production
+chain, etc.
+
+Tasks are created and selected by Subcontroller
+internal logic. Subcontrollers run tasks 
+independently from each other, one Subcontroller 
+can have only one active task.
+
+Each task is a mini state-machine, each state
+implements a certain step in task execution
 end note
 
 SettlementControllers .down. SettlementController

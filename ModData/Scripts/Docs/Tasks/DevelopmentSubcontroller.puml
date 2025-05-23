@@ -1,0 +1,27 @@
+@startuml development subcontroller tasks
+
+skinparam ComponentStyle rectangle
+
+component DevelopSettlementTask {
+    component ProduceSettlementEnhancementsState
+}
+
+note right of DevelopSettlementTask
+Enhances settlement in one or another way:
+fully builds one production chain for 
+battle unit, builds one auxiliary building
+like Church or Windmill
+end note
+
+component DefenceBuildTask {
+    component DefenceBuildState
+}
+
+note right of DefenceBuildTask
+Builds towers at main settlement, expand or
+nearby to settlement narrow passage
+end note
+
+DevelopSettlementTask -[hidden]down-> DefenceBuildTask
+
+@enduml

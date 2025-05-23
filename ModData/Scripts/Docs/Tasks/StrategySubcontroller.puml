@@ -1,0 +1,54 @@
+@startuml strategy subcontroller tasks
+
+skinparam ComponentStyle rectangle
+
+component AttackTask {
+    component BuildUpState
+
+    note right of BuildUpState
+    Produces combat units to attack
+    end note
+
+    component ExterminatingState
+
+    note right of ExterminatingState
+    Sends produced units to attack enemy
+    end note
+
+    BuildUpState --> ExterminatingState
+}
+
+note right of AttackTask
+Attacks enemy settlement
+end note
+
+component DefendTask {
+    component DefendingState
+}
+
+note right of DefendTask
+Defends settlement from enemy's attack
+end note
+
+component LandmarkCaptureTask {
+    component LandmarkCapturePrepareState
+
+    note right of LandmarkCapturePrepareState
+    Produces combat units to attack
+    end note
+
+    component LandmarkCaptureState
+
+    note right of LandmarkCaptureState
+    Sends produced units to capture point
+    end note
+
+    LandmarkCapturePrepareState --> LandmarkCaptureState
+}
+
+note right of LandmarkCaptureTask
+Captures some point at map, for example,
+minerals deposit
+end note
+
+@enduml

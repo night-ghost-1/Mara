@@ -1,0 +1,36 @@
+@startuml mining subcontroller tasks
+
+skinparam ComponentStyle rectangle
+
+component ExpandBuildTask {
+    component ExpandBuildState
+}
+
+note right of ExpandBuildTask
+Builds resource mining facilities
+(sawmills, mines, etc) at designated
+location
+end note
+
+component ExpandUpgradeTask {
+    component ExpandUpgradeState
+}
+
+note right of ExpandUpgradeTask
+Builds metal stock on expand if
+there is no one nearby
+end note
+
+component ProduceHarvestersTask {
+    component ProduceHarvestersState
+}
+
+note right of ProduceHarvestersTask
+Produce harvesters in case of their
+shortage
+end note
+
+ExpandBuildTask -[hidden]down-> ExpandUpgradeTask
+ExpandUpgradeTask -[hidden]down-> ProduceHarvestersTask
+
+@enduml
