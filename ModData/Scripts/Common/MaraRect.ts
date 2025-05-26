@@ -24,6 +24,30 @@ export class MaraRect {
         )
     }
 
+    public get PerimeterCells(): Array<MaraPoint> {
+        let result = new Array<MaraPoint>();
+        
+        let shiftVector = new MaraPoint(0, 1);
+        let currentCell = this.BottomRight;
+
+        for (let i = 0; i < 4; i ++) {
+            shiftVector = shiftVector.Rotate90DegreesCcw();
+            while (true) {
+                let nextCell = currentCell.Shift(shiftVector);
+
+                if (this.IsPointInside(nextCell)) {
+                    currentCell = nextCell;
+                    result.push(currentCell);
+                }
+                else {
+                    break;
+                }
+            }
+        }
+
+        return result;
+    }
+
     IsPointInside(point: IMaraPoint): boolean {
         return (
             point.X >= this.TopLeft.X && point.Y >= this.TopLeft.Y

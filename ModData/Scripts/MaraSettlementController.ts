@@ -148,6 +148,7 @@ export class MaraSettlementController {
         this.DevelopmentController = new DevelopmentSubcontroller(this);
         this.subcontrollers.push(this.DevelopmentController);
 
+        this.initBuildingRestrictions();
     }
     
     Tick(tickNumber: number): void {
@@ -287,6 +288,30 @@ export class MaraSettlementController {
         else {
             this.settlementLocation = null;
             return;
+        }
+    }
+
+    private initBuildingRestrictions(): void {
+        let scenaWidth = MaraUtils.GetScenaWidth();
+        let scenaHeigth = MaraUtils.GetScenaHeigth();
+
+        let outerRect = new MaraRect(
+            new MaraPoint(0, 0),
+            new MaraPoint(scenaWidth - 1, scenaHeigth - 1)
+        );
+
+        let innerRect = new MaraRect(
+            new MaraPoint(1, 1),
+            new MaraPoint(scenaWidth - 2, scenaHeigth - 2)
+        );
+
+        let outerCells = outerRect.PerimeterCells;
+        let innerCells = innerRect.PerimeterCells;
+
+        let roadsModule = this.MasterMind.SituationalCenter.Roads;
+
+        for (let cell of [...outerCells, ...innerCells]) {
+            roadsModule.IncreaseReservationPointsAt(cell.X, cell.Y, 10);
         }
     }
 }
