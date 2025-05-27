@@ -17,4 +17,4 @@ Install like a regular Horde Resurrection mod and activate in game launcher. No 
 
 ## Documentation
 
-See /Scripts/Docs folder for brief details on code structure.
+See ы/Docs folder for brief details on code structure.
