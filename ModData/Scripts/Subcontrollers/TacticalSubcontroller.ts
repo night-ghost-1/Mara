@@ -98,7 +98,7 @@ export class TacticalSubcontroller extends MaraSubcontroller {
     }
 
     Attack(target: MaraUnitCacheItem): void {
-        let attackState = new TacticalAttackState(target, this);
+        let attackState = new TacticalAttackState(target, this, this.state.constructor.name);
         this.setState(attackState);
     }
 

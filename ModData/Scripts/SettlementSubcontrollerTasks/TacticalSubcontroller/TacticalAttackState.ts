@@ -8,14 +8,17 @@ export class TacticalAttackState extends FsmState {
     private currentTarget: MaraUnitCacheItem;
     private tacticalController: TacticalSubcontroller;
     private attackPath: Array<MaraPoint> = [];
+    private prevStateName: string;
 
     constructor(
         target: MaraUnitCacheItem, 
-        controller: TacticalSubcontroller
+        controller: TacticalSubcontroller,
+        prevStateName: string
     ) {
         super();
         this.currentTarget = target;
         this.tacticalController = controller;
+        this.prevStateName = prevStateName;
     }
     
     OnEntry(): void {
@@ -51,14 +54,17 @@ export class TacticalAttackState extends FsmState {
             MaraUtils.DrawPath(this.attackPath, this.tacticalController.SettlementController.Settlement.SettlementColor);
         }
 
-        let ratio = MaraUtils.RandomSelect<number>(
-            this.tacticalController.SettlementController.MasterMind,
-            this.tacticalController.SettlementController.Settings.Combat.OffensiveToDefensiveRatios
-        ) ?? 1;
-        
-        this.tacticalController.Debug(`Calculated attack to defense ratio: ${ratio}`);
-        
-        this.tacticalController.ComposeSquads(ratio);
+        if (this.constructor.name != this.prevStateName) {
+            let ratio = MaraUtils.RandomSelect<number>(
+                this.tacticalController.SettlementController.MasterMind,
+                this.tacticalController.SettlementController.Settings.Combat.OffensiveToDefensiveRatios
+            ) ?? 1;
+            
+            this.tacticalController.Debug(`Calculated attack to defense ratio: ${ratio}`);
+            
+            this.tacticalController.ComposeSquads(ratio);
+        }
+
         this.tacticalController.IssueAttackCommand(this.attackPath);
     }
 
