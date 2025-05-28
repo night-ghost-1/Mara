@@ -1,0 +1,15 @@
+{
+  "FormatVersion": "v0.68dev",
+  "Items": [
+    {
+      "Uid": "#Force_Barbarian",
+      "Archetype": "#Force_Barbarian",
+      "DefaultCharacter": "#MindCharacter_MaraDefault"
+    },
+    {
+      "Uid": "#Force_Slavyane",
+      "Archetype": "#Force_Slavyane",
+      "DefaultCharacter": "#MindCharacter_MaraDefault"
+    }
+  ]
+}

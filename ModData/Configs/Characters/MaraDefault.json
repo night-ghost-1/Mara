@@ -1,0 +1,13 @@
+{
+  "FormatVersion": "v0.68dev",
+  "Items": [
+    {
+      "Uid": "#MindCharacter_MaraDefault",
+      "Description": "Mara от NightGhost",
+      "DisplayName": "Mara",
+      "DisplayNicknameMask": "[Mara] {0}",
+      "ForInternalUsingOnly": false,
+      "ProductionScript": []
+    }
+  ]
+}
