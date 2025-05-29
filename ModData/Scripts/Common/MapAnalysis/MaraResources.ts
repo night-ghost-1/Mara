@@ -79,14 +79,16 @@ export class MaraResources {
         return result;
     }
 
-    public Add(other: MaraResources): void {
+    public Add(other: MaraResources, sign?: number): void {
+        let signNormalized = (sign ?? 1) > 0 ? 1 : -1;
+        
         other.resources.forEach(
             (v, k) => {
                 let thisValue = this.resources.get(k) ?? 0;
                 let otherValue = other.resources.get(k) ?? 0;
                 
-                this.resources.set(k, thisValue + otherValue);
+                this.resources.set(k, thisValue + signNormalized * otherValue);
             }
-        )
+        );
     }
 }

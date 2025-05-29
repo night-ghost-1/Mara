@@ -50,9 +50,9 @@ class TimeoutsSettings {
 class Priorities {
     // Tasks
     public SettlementDefence: MaraPriority = MaraPriority.Absolute;
-    public ExpandBuild: MaraPriority = MaraPriority.Normal;
+    public Attack: MaraPriority = MaraPriority.Major;
+    public ExpandBuild: MaraPriority = MaraPriority.Major;
     public SettlementDevelopment: MaraPriority = MaraPriority.Normal;
-    public Attack: MaraPriority = MaraPriority.Normal;
     public LandmarkCapture: MaraPriority = MaraPriority.Normal;
     public DefenceBuild: MaraPriority = MaraPriority.Normal;
     public ProduceAdditionalHarvesters: MaraPriority = MaraPriority.Low;

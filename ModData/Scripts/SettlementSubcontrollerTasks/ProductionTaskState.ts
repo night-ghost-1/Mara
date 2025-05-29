@@ -44,6 +44,7 @@ export abstract class ProductionTaskState extends SubcontrollerTaskState {
         if (this.requestMiningOnInsufficientResources) {
             let requestResult = this.settlementController.MiningController.ProvideResourcesForUnitComposition(
                 this.task.constructor.name, 
+                this.task.Priority,
                 compositionToProduce
             );
 

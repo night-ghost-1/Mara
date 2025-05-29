@@ -17,6 +17,7 @@ import { SubcontrollerRequestResult } from "../Common/SubcontrollerRequestResult
 import { ProduceHarvestersTask } from "../SettlementSubcontrollerTasks/MiningSubcontroller/ProduceHarvestersTask/ProduceHarvestersTask";
 import { ExpandUpgradeTask } from "../SettlementSubcontrollerTasks/MiningSubcontroller/ExpandUpgradeTask/ExpandUpgradeTask";
 import { Settlement } from "library/game-logic/horde-types";
+import { MaraPriority } from "../Common/MaraPriority";
 
 class MineData {
     public Mine: MaraUnitCacheItem | null = null;
@@ -36,10 +37,12 @@ class NeedExpandResult {
 
 class ResourceRequest {
     RequestedResources: MaraResources;
+    Priority: MaraPriority;
     RequestTick: number | null;
 
-    constructor(resources: MaraResources) {
+    constructor(resources: MaraResources, priority: MaraPriority) {
         this.RequestedResources = resources;
+        this.Priority = priority;
         this.RequestTick = null;
     }
 }
@@ -180,18 +183,47 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
             this.Sawmills.length * this.settlementController.Settings.ResourceMining.WoodcutterBatchSize;
     }
 
-    public ProvideResourcesForUnitComposition(requestor: string, composition: UnitComposition): SubcontrollerRequestResult {
+    public ProvideResourcesForUnitComposition(
+        requestor: string, 
+        priority: MaraPriority, 
+        composition: UnitComposition
+    ): SubcontrollerRequestResult {
         let compositionCost = this.calculateCompositionCost(composition);
-        let resourceRequest = new ResourceRequest(compositionCost);
+        let resourceRequest = new ResourceRequest(compositionCost, priority);
 
-        this.resourceRequests.set(requestor, resourceRequest);
-        this.Debug(`Added resource request from ${requestor} for ${compositionCost.ToString()}`);
+        let key = `${requestor}:${priority}`;
+
+        this.resourceRequests.set(key, resourceRequest);
+        this.Debug(`Added resource request from ${requestor} for ${compositionCost.ToString()} with priority ${priority}`);
+
+        let freeResources = this.getTotalResources();
+
+        this.resourceRequests.forEach((v) => {
+            if (v.Priority > priority) {
+                freeResources.Add(v.RequestedResources, -1);
+            }
+        });
 
         let result = new SubcontrollerRequestResult();
-        result.IsSuccess = true;
-        result.Task = null;
 
-        this.nextTaskAttemptTick = 0;
+        if (freeResources.IsGreaterOrEquals(compositionCost)) {
+            result.IsSuccess = true;
+            result.Task = null;
+        }
+        else {
+            compositionCost.Add(freeResources, -1);
+            let targetExpand = this.fillExpandData(compositionCost);
+
+            result.IsSuccess = false;
+            result.Task = new ExpandBuildTask(
+                this.settlementController.Settings.Priorities.ExpandBuild, 
+                this.settlementController, 
+                targetExpand, 
+                this
+            );
+
+            this.nextTaskAttemptTick = 0;
+        }
 
         return result;
     }
