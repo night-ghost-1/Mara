@@ -51,9 +51,9 @@ class Priorities {
     // Tasks
     public SettlementDefence: MaraPriority = MaraPriority.Absolute;
     public Attack: MaraPriority = MaraPriority.Major;
+    public LandmarkCapture: MaraPriority = MaraPriority.Normal;
     public ExpandBuild: MaraPriority = MaraPriority.Normal;
     public SettlementDevelopment: MaraPriority = MaraPriority.Normal;
-    public LandmarkCapture: MaraPriority = MaraPriority.Normal;
     public DefenceBuild: MaraPriority = MaraPriority.Normal;
     public ProduceAdditionalHarvesters: MaraPriority = MaraPriority.Low;
     public ExpandUpgrade: MaraPriority = MaraPriority.Low;
