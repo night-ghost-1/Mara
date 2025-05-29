@@ -91,7 +91,7 @@ export class ProductionSubcontroller extends MaraSubcontroller {
         }
 
         this.productionIndex = null;
-        let uncompletedRequests = new SortedSet(this.queueOptions);
+        let incompleteRequests = new SortedSet(this.queueOptions);
         
         let iterator = this.queuedRequests.beginIterator();
         let highestRequestPriority = -Infinity;
@@ -108,7 +108,7 @@ export class ProductionSubcontroller extends MaraSubcontroller {
                 this.finalizeProductionRequest(request);
             }
             else {
-                uncompletedRequests.insert(request);
+                incompleteRequests.insert(request);
 
                 if (request.IsCancelled) {
                     continue;
@@ -141,7 +141,7 @@ export class ProductionSubcontroller extends MaraSubcontroller {
             }
         }
 
-        this.queuedRequests = uncompletedRequests;
+        this.queuedRequests = incompleteRequests;
 
         let filteredExecutingItems: Array<MaraProductionRequestItem> = [];
 
