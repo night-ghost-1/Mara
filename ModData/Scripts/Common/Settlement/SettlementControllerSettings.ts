@@ -51,7 +51,7 @@ class Priorities {
     // Tasks
     public SettlementDefence: MaraPriority = MaraPriority.Absolute;
     public Attack: MaraPriority = MaraPriority.Major;
-    public ExpandBuild: MaraPriority = MaraPriority.Major;
+    public ExpandBuild: MaraPriority = MaraPriority.Normal;
     public SettlementDevelopment: MaraPriority = MaraPriority.Normal;
     public LandmarkCapture: MaraPriority = MaraPriority.Normal;
     public DefenceBuild: MaraPriority = MaraPriority.Normal;
@@ -60,10 +60,10 @@ class Priorities {
 
     // Production Requests
     public DefenceUnitsProduction: MaraPriority = MaraPriority.Absolute;
+    public AttackUnitsProduction: MaraPriority = MaraPriority.Major;
+    public LandmarkCaptureUnitsProduction: MaraPriority = MaraPriority.Major;
     public HarvesterProduction: MaraPriority = MaraPriority.Normal;
     public HousingProduction: MaraPriority = MaraPriority.Normal;
-    public AttackUnitsProduction: MaraPriority = MaraPriority.Normal;
-    public LandmarkCaptureUnitsProduction: MaraPriority = MaraPriority.Low;
     public ReinforcementUnitsProduction: MaraPriority = MaraPriority.Background;
 }
 
