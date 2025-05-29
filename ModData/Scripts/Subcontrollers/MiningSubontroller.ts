@@ -41,7 +41,7 @@ class ResourceRequest {
     RequestTick: number | null;
 
     constructor(resources: MaraResources, priority: MaraPriority) {
-        this.RequestedResources = resources;
+        this.RequestedResources = resources.Copy();
         this.Priority = priority;
         this.RequestTick = null;
     }
@@ -200,9 +200,11 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
 
         this.resourceRequests.forEach((v) => {
             if (v.Priority > priority) {
-                freeResources.Add(v.RequestedResources, -1);
+                freeResources.Substract(v.RequestedResources);
             }
         });
+
+        this.Debug(`Free resources: ${freeResources.ToString()}`);
 
         let result = new SubcontrollerRequestResult();
 
@@ -211,7 +213,7 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
             result.Task = null;
         }
         else {
-            compositionCost.Add(freeResources, -1);
+            compositionCost.Substract(freeResources);
             let targetExpand = this.fillExpandData(compositionCost);
 
             result.IsSuccess = false;
