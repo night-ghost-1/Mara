@@ -31,8 +31,14 @@ export abstract class MaraTaskableSubcontroller extends MaraSubcontroller {
 
                 this.activeTask = null;
             }
+            else if (this.activeTask.IsIdle) {
+                this.Debug(`Task ${this.activeTask.constructor.name} put on idle`);
+                
+                this.allTasks.push(this.activeTask);
+                this.activeTask = null;
+            }
             else {
-                let priorityTask = MaraUtils.FindExtremum(this.allTasks, (c, e) => c.Priority - e.Priority);
+                let priorityTask = this.selectMaxPriorityTask();
 
                 if (priorityTask && priorityTask.Priority > this.activeTask.Priority) {
                     this.setActiveTask(priorityTask);
@@ -40,7 +46,7 @@ export abstract class MaraTaskableSubcontroller extends MaraSubcontroller {
             }
         }
         else if (this.allTasks.length > 0) {
-            let highestPriorityTask = MaraUtils.FindExtremum(this.allTasks, (c, e) => c.Priority - e.Priority);
+            let highestPriorityTask = this.selectMaxPriorityTask();
             
             if (highestPriorityTask) {
                 this.setActiveTask(highestPriorityTask);
@@ -59,6 +65,12 @@ export abstract class MaraTaskableSubcontroller extends MaraSubcontroller {
         if (this.activeTask) {
             this.activeTask.Tick(tickNumber);
         }
+
+        for (let task of this.allTasks) {
+            if (task.IsIdle) {
+                task.Tick(tickNumber);
+            }
+        }
     }
 
     AddTask(task: SettlementSubcontrollerTask): void {
@@ -75,5 +87,11 @@ export abstract class MaraTaskableSubcontroller extends MaraSubcontroller {
         this.activeTask = task;
         this.allTasks = this.allTasks.filter((t) => t != this.activeTask);
         this.Debug(`Start executing task ${this.activeTask.constructor.name}`);
+    }
+
+    private selectMaxPriorityTask(): SettlementSubcontrollerTask | null {
+        let tasks = this.allTasks.filter((t) => !t.IsIdle);
+        
+        return MaraUtils.FindExtremum(tasks, (c, e) => c.Priority - e.Priority);
     }
 }

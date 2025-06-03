@@ -7,6 +7,7 @@ export abstract class SettlementSubcontrollerTask extends FiniteStateMachine {
     IsCompleted: boolean = false;
     IsSuccess: boolean = false;
     Priority: MaraPriority;
+    IsIdle: boolean = false;
     readonly SettlementController: MaraSettlementController;
 
     public abstract get ExpectedTimeout(): number;
