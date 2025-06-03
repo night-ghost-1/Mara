@@ -22,7 +22,6 @@ import { SubcontrollerRequestResult } from "../Common/SubcontrollerRequestResult
 import { LandmarkCaptureTask } from "../SettlementSubcontrollerTasks/StrategySubcontroller/LandmarkCaptureTask/LandmarkCaptureTask";
 import { MaraMapNodeType } from "../Common/MapAnalysis/MaraMapNodeType";
 import { Player, Settlement } from "library/game-logic/horde-types";
-import { MaraPriority } from "../Common/MaraPriority";
 
 class PathSelectItem implements NonUniformRandomSelectItem {
     // @ts-ignore
@@ -469,11 +468,11 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
         return new MaraResourceClusterSelection(optimalCluster, isReachable, reachableCluster);
     }
 
-    CaptureLandmark(point: MaraPoint, priority: MaraPriority): SubcontrollerRequestResult {
+    CaptureLandmark(point: MaraPoint): SubcontrollerRequestResult {
         let result = new SubcontrollerRequestResult();
 
         result.IsSuccess = false;
-        result.Task = new LandmarkCaptureTask(point, this.settlementController, this, priority);
+        result.Task = new LandmarkCaptureTask(point, this.settlementController, this);
         
         this.AddTask(result.Task);
 

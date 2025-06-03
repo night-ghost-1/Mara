@@ -27,7 +27,7 @@ export class ExpandBuildTask extends SettlementSubcontrollerTask {
         let finalState: SubcontrollerTaskState = buildState;
 
         if (targetExpand.Cluster) {
-            let requestResult = this.SettlementController.StrategyController.CaptureLandmark(targetExpand.Cluster.Center, priority);
+            let requestResult = this.SettlementController.StrategyController.CaptureLandmark(targetExpand.Cluster.Center);
 
             if (!requestResult.IsSuccess) {
                 this.Debug(`Need to capture expand location, awaiting...`);
