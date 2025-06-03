@@ -38,12 +38,14 @@ class NeedExpandResult {
 class ResourceRequest {
     RequestedResources: MaraResources;
     Priority: MaraPriority;
-    RequestTick: number | null;
+    ExpirationTick: number | null;
+    IsExpired: boolean;
 
     constructor(resources: MaraResources, priority: MaraPriority) {
         this.RequestedResources = resources.Copy();
         this.Priority = priority;
-        this.RequestTick = null;
+        this.ExpirationTick = null;
+        this.IsExpired = false;
     }
 }
 
@@ -199,7 +201,7 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
         let freeResources = this.getTotalResources();
 
         this.resourceRequests.forEach((v) => {
-            if (v.Priority > priority) {
+            if (v.Priority > priority && !v.IsExpired) {
                 freeResources.Substract(v.RequestedResources);
             }
         });
@@ -261,8 +263,11 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
     protected makeSelfTask(tickNumber: number): SettlementSubcontrollerTask | null {
         this.resourceRequests.forEach(
             (v) => {
-                if (!v.RequestTick) {
-                    v.RequestTick = tickNumber;
+                if (v.ExpirationTick == null) {
+                    v.ExpirationTick = tickNumber + this.settlementController.Settings.Timeouts.ResourceRequestDuration;
+                }
+                else if (v.ExpirationTick <= tickNumber) { 
+                    v.IsExpired = true;
                 }
             }
         );
@@ -271,10 +276,7 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
 
         this.resourceRequests.forEach(
             (v) => {
-                if (
-                    tickNumber - v.RequestTick! < 
-                        this.settlementController.Settings.Timeouts.ResourceRequestDuration
-                ) {
+                if (!v.IsExpired) {
                     requestedResources.Add(v.RequestedResources);
                 }
             }
