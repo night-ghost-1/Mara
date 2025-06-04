@@ -20,7 +20,7 @@ export abstract class MaraTaskableSubcontroller extends MaraSubcontroller {
         
         if (this.activeTask) {
             if (this.activeTask.IsCompleted) {
-                this.Debug(`Task ${this.activeTask.constructor.name} completed with result ${this.activeTask.IsSuccess}`);
+                this.Debug(`Task ${this.activeTask.ToString()} completed with result ${this.activeTask.IsSuccess}`);
 
                 if (this.activeTask.IsSuccess) {
                     this.onTaskSuccess(tickNumber);
@@ -32,7 +32,7 @@ export abstract class MaraTaskableSubcontroller extends MaraSubcontroller {
                 this.activeTask = null;
             }
             else if (this.activeTask.IsIdle) {
-                this.Debug(`Task ${this.activeTask.constructor.name} put on idle`);
+                this.Debug(`Task ${this.activeTask.ToString()} put on idle`);
                 
                 this.allTasks.push(this.activeTask);
                 this.activeTask = null;
@@ -75,18 +75,18 @@ export abstract class MaraTaskableSubcontroller extends MaraSubcontroller {
 
     AddTask(task: SettlementSubcontrollerTask): void {
         this.allTasks.push(task);
-        this.Debug(`Added task ${task.constructor.name} with priority ${task.Priority} to queue`);
+        this.Debug(`Added task ${task.ToString()} with priority ${task.Priority} to queue`);
     }
 
     private setActiveTask(task: SettlementSubcontrollerTask): void {
         if (this.activeTask) {
             this.activeTask.Complete(false);
-            this.Debug(`Task ${this.activeTask.constructor.name} cancelled`);
+            this.Debug(`Task ${this.activeTask.ToString()} cancelled`);
         }
 
         this.activeTask = task;
         this.allTasks = this.allTasks.filter((t) => t != this.activeTask);
-        this.Debug(`Start executing task ${this.activeTask.constructor.name}`);
+        this.Debug(`Start executing task ${this.activeTask.ToString()}`);
     }
 
     private selectMaxPriorityTask(): SettlementSubcontrollerTask | null {

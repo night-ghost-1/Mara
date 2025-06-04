@@ -27,17 +27,17 @@ export class AwaitTaskCompletionState extends SubcontrollerTaskState {
     }
     
     OnEntry(): void {
-        this.task.Debug(`Awaiting task ${this.awaitedTask.constructor.name} completion...`);
+        this.task.Debug(`Awaiting task ${this.awaitedTask.ToString()} completion...`);
         this.task.IsIdle = true;
     }
 
     OnExit(): void {
         if (!this.awaitedTask.IsCompleted) {
-            this.task.Debug(`Task ${this.awaitedTask.constructor.name} completion timeout, resuming`);
+            this.task.Debug(`Task ${this.awaitedTask.ToString()} completion timeout, resuming`);
             this.awaitedTask.Complete(false);
         }
         else {
-            this.task.Debug(`Task ${this.awaitedTask.constructor.name} completed, resuming`);
+            this.task.Debug(`Task ${this.awaitedTask.ToString()} completed, resuming`);
         }
 
         this.task.IsIdle = false;
