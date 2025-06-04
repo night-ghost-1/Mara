@@ -226,6 +226,7 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
                 this
             );
 
+            this.AddTask(result.Task);
             this.nextTaskAttemptTick = 0;
         }
 
