@@ -55,7 +55,7 @@ class Priorities {
     public ExpandBuild: MaraPriority = MaraPriority.Normal;
     public SettlementDevelopment: MaraPriority = MaraPriority.Normal;
     public DefenceBuild: MaraPriority = MaraPriority.Normal;
-    public ProduceAdditionalHarvesters: MaraPriority = MaraPriority.Low;
+    public ProduceAdditionalHarvesters: MaraPriority = MaraPriority.Normal;
     public ExpandUpgrade: MaraPriority = MaraPriority.Low;
 
     // Production Requests
