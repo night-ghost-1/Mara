@@ -10,6 +10,7 @@ export class MaraProductionRequest {
     public Items: Array<MaraProductionRequestItem>;
     public readonly Id: number;
     public readonly Priority: MaraPriority;
+    public readonly IsMandatory: boolean;
 
     private isCancelled = false;
 
@@ -28,12 +29,14 @@ export class MaraProductionRequest {
     constructor(
         items: Array<MaraProductionRequestItem>,
         priority: MaraPriority,
-        isForce?: boolean
+        isForce: boolean = false,
+        isMandatory: boolean = true
     ) {
         this.Items = items;
         this.Items.forEach((i) => i.ParentRequest = this);
         this.Priority = priority;
-        this.IsForce = isForce ?? false;
+        this.IsForce = isForce;
+        this.IsMandatory = isMandatory;
 
         MaraProductionRequest.idSequence ++;
         this.Id = MaraProductionRequest.idSequence;

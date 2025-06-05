@@ -156,7 +156,7 @@ export abstract class ProductionTaskState extends SubcontrollerTaskState {
     protected makeProductionQueueRequest(
         items: Array<MaraProductionRequestItem>
     ): MaraProductionRequest {
-        let productionRequest = new MaraProductionRequest(items, this.task.Priority, false);
+        let productionRequest = new MaraProductionRequest(items, this.task.Priority, false, false);
         this.settlementController.ProductionController.RequestProduction(productionRequest);
         
         return productionRequest;
@@ -256,6 +256,10 @@ export abstract class ProductionTaskState extends SubcontrollerTaskState {
         let unknownRequestItems: Array<MaraProductionRequestItem> = [];
         
         for (let request of completedRequests) {
+            if (!request.IsMandatory) {
+                continue;
+            }
+            
             for (let item of request.Items) {
                 if (item.IsSuccess) {
                     if (item.ProducedUnit) {
