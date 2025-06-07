@@ -74,7 +74,7 @@ export class BuildUpState extends ProductionTaskState {
                     let randomPath = MaraUtils.RandomSelect(this.settlementController.MasterMind, paths);
                     
                     if (randomPath) {
-                        let bridgeRequest = this.makeBridgeProductionRequest(randomPath);
+                        let bridgeRequest = this.makeBridgeProductionRequest(randomPath, this.settlementController.Settings.Priorities.LandmarkCaptureUnitsProduction);
                         
                         if (bridgeRequest) {
                             result.push(bridgeRequest);

@@ -61,7 +61,7 @@ export class LandmarkCapturePrepareState extends ProductionTaskState {
                 [TileType.Water]
             );
             
-            let bridgeRequest = this.makeBridgeProductionRequest(path);
+            let bridgeRequest = this.makeBridgeProductionRequest(path, this.settlementController.Settings.Priorities.LandmarkCaptureUnitsProduction);
 
             if (bridgeRequest) {
                 result.push(bridgeRequest);
