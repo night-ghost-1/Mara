@@ -108,6 +108,8 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
                 requiredStrength += MaraUtils.GetUnitStrength(unit);
             }
 
+            requiredStrength = Math.max(requiredStrength, this.settlementController.Settings.Squads.MinStrength);
+
             let currentOffensiveStrength = this.getCurrentTotalStrength() - this.GetCurrentDefensiveStrength();
 
             requiredStrength -= currentOffensiveStrength;
