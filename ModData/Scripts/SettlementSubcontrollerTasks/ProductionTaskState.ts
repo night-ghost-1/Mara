@@ -153,16 +153,7 @@ export abstract class ProductionTaskState extends SubcontrollerTaskState {
         return productionRequest;
     }
 
-    protected makeProductionQueueRequest(
-        items: Array<MaraProductionRequestItem>
-    ): MaraProductionRequest {
-        let productionRequest = new MaraProductionRequest(items, this.task.Priority, false, false);
-        this.settlementController.ProductionController.RequestProduction(productionRequest);
-        
-        return productionRequest;
-    }
-
-    protected makeBridgeProductionRequest(path: MaraPath | null): MaraProductionRequest | null {
+    protected makeBridgeProductionRequest(path: MaraPath | null, priority: MaraPriority): MaraProductionRequest | null {
         if (!path) {
             this.task.Debug(`Unable to build bridge: path not found`);
             return null;
@@ -211,7 +202,7 @@ export abstract class ProductionTaskState extends SubcontrollerTaskState {
                             this.settlementController.Debug(`Unable to markup bridge from ${currentNode.Id} to ${nextNode.Id} (${currentNode.Region.Center.ToString()} - ${nextNode.Region.Center.ToString()})`);
                             
                             if (requestItems.length > 0) {
-                                return this.makeProductionQueueRequest(requestItems);
+                                return this.makeProductionQueueRequest(requestItems, priority);
                             }
                             else {
                                 return null;
@@ -231,12 +222,22 @@ export abstract class ProductionTaskState extends SubcontrollerTaskState {
         }
 
         if (requestItems.length > 0) {
-            return this.makeProductionQueueRequest(requestItems);
+            return this.makeProductionQueueRequest(requestItems, priority);
         }
         else {
             this.task.Debug(`Destination is reachable, bridge is not needed`);
             return null;
         }
+    }
+
+    private makeProductionQueueRequest(
+        items: Array<MaraProductionRequestItem>,
+        priority: MaraPriority
+    ): MaraProductionRequest {
+        let productionRequest = new MaraProductionRequest(items, priority, false);
+        this.settlementController.ProductionController.RequestProduction(productionRequest);
+        
+        return productionRequest;
     }
 
     private getRequestsToReorder(): Array<MaraProductionRequest> {
