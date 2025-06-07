@@ -42,7 +42,7 @@ export class DefenceBuildState extends ProductionTaskState {
         armyToProduce.forEach(
             (value, key) => {
                 for (let i = 0; i < value; i++) {
-                    result.push(this.makeProductionRequest(key, this.point, null, false, this.settlementController.Settings.Priorities.DefenceUnitsProduction));
+                    result.push(this.makeProductionRequest(key, this.point, null, false, this.settlementController.Settings.Priorities.SettlementDevelopment));
                 }
             }
         );
