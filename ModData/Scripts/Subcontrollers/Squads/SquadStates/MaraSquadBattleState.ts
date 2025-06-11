@@ -1,6 +1,5 @@
 import { MaraUtils } from "../../../MaraUtils";
 import { MaraSquad, MaraSquadLocation } from "../MaraSquad";
-import { MaraSquadAttackState } from "./MaraSquadAttackState";
 import { MaraSquadMoveState } from "./MaraSquadMoveState";
 import { MaraSquadState } from "./MaraSquadState";
 import { TileType } from "library/game-logic/horde-types";
@@ -81,8 +80,7 @@ export class MaraSquadBattleState extends MaraSquadState {
         this.updateThreats();
 
         if (this.enemyUnits.length == 0) {
-            this.squad.Attack(this.squad.CurrentPath!);
-            this.squad.SetState(new MaraSquadAttackState(this.squad));
+            this.resumeAttackMovement();
             return;
         }
 
@@ -112,8 +110,7 @@ export class MaraSquadBattleState extends MaraSquadState {
                 this.enemyUnits.length == 0 || 
                 !this.squad.CanAttackAtLeastOneUnit(this.enemyUnits)
             ) {
-                this.squad.Attack(this.squad.CurrentPath!);
-                this.squad.SetState(new MaraSquadAttackState(this.squad));
+                this.resumeAttackMovement();
                 return;
             }
 

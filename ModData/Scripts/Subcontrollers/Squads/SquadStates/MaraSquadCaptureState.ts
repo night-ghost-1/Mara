@@ -1,7 +1,6 @@
 import { MaraUtils } from "../../../MaraUtils";
 import { MaraSquadState } from "./MaraSquadState";
 import { MaraSquadBattleState } from "./MaraSquadBattleState";
-import { MaraSquadAttackState } from "./MaraSquadAttackState";
 import { MaraUnitCacheItem } from "../../../Common/Cache/MaraUnitCacheItem";
 
 export class MaraSquadCaptureState extends MaraSquadState {
@@ -22,8 +21,7 @@ export class MaraSquadCaptureState extends MaraSquadState {
 
         if (tickNumber % 50 == 0) {
             if (!this.distributeCapturingUnits()) {
-                this.squad.Attack(this.squad.CurrentPath!);
-                this.squad.SetState(new MaraSquadAttackState(this.squad));
+                this.resumeAttackMovement();
                 return;
             }
         }

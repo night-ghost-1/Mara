@@ -1,6 +1,7 @@
 import { MaraControllableSquad } from "../MaraControllableSquad";
 import { FsmState } from "../../../Common/FiniteStateMachine/FsmState";
 import { MaraUtils } from "../../../MaraUtils";
+import { MaraSquadAttackState } from "./MaraSquadAttackState";
 
 export abstract class MaraSquadState extends FsmState {
     protected squad: MaraControllableSquad;
@@ -34,5 +35,13 @@ export abstract class MaraSquadState extends FsmState {
         if (this.squad.CurrentMovementPoint) {
             MaraUtils.IssueMoveCommand(this.squad.Units, this.squad.Controller.Player, this.squad.CurrentMovementPoint);
         }
+    }
+
+    protected resumeAttackMovement(): void {
+        if (!this.squad.AttackPath) {
+            this.squad.Attack(this.squad.CurrentPath!);
+        }
+        
+        this.squad.SetState(new MaraSquadAttackState(this.squad));
     }
 }
