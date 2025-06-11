@@ -17,7 +17,7 @@ export class LandmarkCaptureState extends SubcontrollerTaskState {
     }
     
     OnEntry(): void {
-        if (!this.selectAndAttackEnemy()) {
+        if (!this.selectTarget()) {
             this.task.Debug(`Landmark is captured`);
             this.task.Complete(true);
             return;
@@ -74,10 +74,5 @@ export class LandmarkCaptureState extends SubcontrollerTaskState {
         }
 
         return target != null;
-    }
-
-    private selectAndAttackEnemy(): boolean {
-        this.settlementController.TacticalController.ComposeSquads(1);
-        return this.selectTarget();
     }
 }
