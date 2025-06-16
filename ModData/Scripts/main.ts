@@ -12,22 +12,29 @@ export function onInitialization() {
 }
 
 export class MaraPlugin extends HordePluginBase {
+    private reproducingMode: boolean = false;
+
     public constructor() {
         super(DISPLAY_NAME);
     }
 
     public onFirstRun() {
         this.log.logLevel = LogLevel.Debug;
-        
-        if (!isReplayMode()) {
+        this.reproducingMode = HordeResurrection.Engine.Logic.Main.MainController.HordeSettings.ReplaySettings.BotReproducingMode;
+
+        if (!isReplayMode() || this.reproducingMode) {
             Mara.FirstRun(this.log);
+        }
+
+        if (isReplayMode() && this.reproducingMode) {
+            Mara.Info(`** Mara started in reproducing mode **`);
         }
     }
 
     public onEveryTick(gameTickNum: number) {
         this.mineResources(gameTickNum);
-        
-        if (!isReplayMode()) {
+
+        if (!isReplayMode() || this.reproducingMode) {
             Mara.Tick(gameTickNum);
         }
     }
