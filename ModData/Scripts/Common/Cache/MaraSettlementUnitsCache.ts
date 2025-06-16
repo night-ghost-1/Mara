@@ -28,7 +28,11 @@ export class MaraSettlementUnitsCache {
             }
         );
 
-        settlement.Units.UnitUnitMovedToCell.connect(
+        let unitMovedToCellEvent = ScriptUtils.GameVersionEqualsOrGreater('v0.78')
+            ? settlement.Units.UnitMovedToCell
+            : settlement.Units.UnitUnitMovedToCell;
+
+        unitMovedToCellEvent.connect(
             (sender: any, args: UnitMovedToCellEventArgs | null) => {
                 if (args) {
                     this.unitPositionChangedProcessor(args);
