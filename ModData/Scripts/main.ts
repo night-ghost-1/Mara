@@ -12,7 +12,7 @@ export function onInitialization() {
 }
 
 export class MaraPlugin extends HordePluginBase {
-    private _reproducingMode: boolean = false;
+    private reproducingMode: boolean = false;
 
     public constructor() {
         super(DISPLAY_NAME);
@@ -20,13 +20,13 @@ export class MaraPlugin extends HordePluginBase {
 
     public onFirstRun() {
         this.log.logLevel = LogLevel.Debug;
-        this._reproducingMode = HordeResurrection.Engine.Logic.Main.MainController.HordeSettings.ReplaySettings.BotReproducingMode;
+        this.reproducingMode = HordeResurrection.Engine.Logic.Main.MainController.HordeSettings.ReplaySettings.BotReproducingMode;
 
-        if (!isReplayMode() || this._reproducingMode) {
+        if (!isReplayMode() || this.reproducingMode) {
             Mara.FirstRun(this.log);
         }
 
-        if (isReplayMode() && this._reproducingMode) {
+        if (isReplayMode() && this.reproducingMode) {
             Mara.Info(`** Mara started in reproducing mode **`);
         }
     }
@@ -34,7 +34,7 @@ export class MaraPlugin extends HordePluginBase {
     public onEveryTick(gameTickNum: number) {
         this.mineResources(gameTickNum);
 
-        if (!isReplayMode() || this._reproducingMode) {
+        if (!isReplayMode() || this.reproducingMode) {
             Mara.Tick(gameTickNum);
         }
     }
