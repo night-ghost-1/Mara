@@ -31,6 +31,7 @@ export class TacticalSubcontroller extends MaraSubcontroller {
 
     constructor (parent: MaraSettlementController) {
         super(parent);
+        this.Idle();
     }
 
     public get Player(): Player {
