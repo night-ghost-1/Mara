@@ -118,8 +118,12 @@ export class Mara {
             let processedSettlements: Array<Settlement> = [];
 
             for (let item of MaraUtils.GetAllPlayers()) {
-                Mara.AttachToPlayer(item.index, processedSettlements, tickOffset);
-                tickOffset ++;
+                let player = Players[item.index];
+
+                if (player.IsBot) {
+                    Mara.AttachToPlayer(item.index, processedSettlements, tickOffset);
+                    tickOffset ++;
+                }
             }
         }
         catch (ex) {
