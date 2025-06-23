@@ -31,7 +31,14 @@ export class ExpandBuildState extends ProductionTaskState {
             return false;
         }
         else {
-            let settlementLocation = this.settlementController.GetSettlementLocation()!;
+            this.expandCenter = center;
+            
+            let settlementLocation = this.settlementController.GetSettlementLocation();
+
+            if (!settlementLocation) {
+                return true;
+            }
+
             let path = MaraMap.GetShortestPath(settlementLocation.Center, center);
 
             if (!path && !settlementLocation.Center.EqualsTo(center)) {
@@ -39,7 +46,6 @@ export class ExpandBuildState extends ProductionTaskState {
                 return false;
             }
             
-            this.expandCenter = center;
             return true;
         }
     }
