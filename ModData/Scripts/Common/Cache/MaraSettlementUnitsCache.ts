@@ -28,9 +28,7 @@ export class MaraSettlementUnitsCache {
             }
         );
 
-        let unitMovedToCellEvent = settlement.Units.UnitMovedToCell;
-        
-        unitMovedToCellEvent.connect(
+        settlement.Units.UnitMovedToCell.connect(
             (sender: any, args: UnitMovedToCellEventArgs | null) => {
                 if (args) {
                     this.unitPositionChangedProcessor(args);
