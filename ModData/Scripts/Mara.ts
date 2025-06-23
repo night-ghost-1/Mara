@@ -36,7 +36,6 @@ export class Mara {
     
     private static controllers: Array<MaraSettlementController> = [];
     private static pathfinder: PathFinder;
-    private static currentTick: number;
     
     public static get Controllers(): Array<MaraSettlementController> {
         return Mara.controllers;
@@ -60,8 +59,6 @@ export class Mara {
     
     static Tick(tickNumber: number): void {
         try {
-            Mara.currentTick = tickNumber;
-            
             if (Mara.CanRun) {
                 if (tickNumber < 10) { //doing nothing for first 10 ticks since not all core objects could be properly inited
                     return;
@@ -177,20 +174,18 @@ export class Mara {
 
     //#region logging helpers
     static Log(level: MaraLogLevel, message: string) {
-        let logMessage = `[${Mara.currentTick}] ${message}`;
-
         switch (level) {
             case MaraLogLevel.Debug:
-                DebugLogger.WriteLine(`D ${logMessage}`);
+                DebugLogger.WriteLine(`D ${message}`);
                 break;
             case MaraLogLevel.Info:
-                Mara.Logger.info(logMessage);
+                Mara.Logger.info(message);
                 break;
             case MaraLogLevel.Warning:
-                Mara.Logger.warning(logMessage);
+                Mara.Logger.warning(message);
                 break;
             case MaraLogLevel.Error:
-                Mara.Logger.error(logMessage);
+                Mara.Logger.error(message);
                 break;
         }
     }
