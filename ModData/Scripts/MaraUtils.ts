@@ -35,7 +35,7 @@ type UnitsMap = HordeClassLibrary.World.ScenaComponents.Intrinsics.UnitsMap;
 type LandscapeMap = HordeClassLibrary.World.ScenaComponents.Scena.ScenaLandscape;
 type ResourceMap = HordeClassLibrary.World.ScenaComponents.Scena.ScenaResourcesMap;
 type SettlementPopulationCensusModel = HordeClassLibrary.World.Settlements.Models.SettlementPopulationCensusModel;
-
+type HordeRandomizer = HordeResurrection.Basic.Primitives.HordeRandomizer;
 
 class DotnetHolder {
     private static realScena: Scena;
@@ -603,9 +603,13 @@ export class MaraUtils {
     //#endregion
     
     //#region RNG Utils
-    static Random(masterMind: MasterMind, max: number, min: number = 0) {
+    static Random(masterMind: MasterMind, max: number, min: number = 0): number {
         let rnd = masterMind.Randomizer;
-        return rnd.RandomNumber(min, max);
+        return MaraUtils.random(min, max, rnd);
+    }
+
+    private static random(min: number, max: number, randomizer: HordeRandomizer): number {
+        return randomizer.RandomNumber(min, max);
     }
 
     static RandomSelect<Type>(masterMind: MasterMind, items: Array<Type>): Type | null {
@@ -1179,6 +1183,24 @@ export class MaraUtils {
         }
     
         return result;
+    }
+
+    static ShuffleArray<T>(array: T[]): T[] {
+        let randomizer = ActiveScena.Context.Randomizer;
+        let currentIndex = array.length;
+        let randomIndex: number;
+
+        while (currentIndex != 0) {
+            randomIndex = MaraUtils.random(0, currentIndex, randomizer);
+            currentIndex --;
+
+            [array[currentIndex], array[randomIndex]] = [
+                array[randomIndex],
+                array[currentIndex],
+            ];
+        }
+
+        return array;
     }
 
     // Bresenham algorithm to pixelize straight lines are used here
