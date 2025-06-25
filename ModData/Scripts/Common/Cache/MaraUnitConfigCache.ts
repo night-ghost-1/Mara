@@ -26,7 +26,9 @@ class MaraUnitConfigCacheItem {
             let propertyValue = propertyCalculator(this.Config);
             this.configProperties.set(propName, propertyValue);
 
-            Mara.Debug(`set ${propName} to ${propertyValue} for ${this.Config.Uid}`);
+            if (MaraUnitConfigCache.DEBUG_CONFIG_PROPERTIES) {
+                Mara.Debug(`set ${propName} to ${propertyValue} for ${this.Config.Uid}`);
+            }
 
             return propertyValue;
         }
@@ -35,6 +37,8 @@ class MaraUnitConfigCacheItem {
 
 
 export class MaraUnitConfigCache {
+    static readonly DEBUG_CONFIG_PROPERTIES = false;
+    
     private static configCache: Map<string, MaraUnitConfigCacheItem> = new Map<string, MaraUnitConfigCacheItem>();
     private static canAttackCache: Map<string, boolean> = new Map<string, boolean>();
 
@@ -79,7 +83,9 @@ export class MaraUnitConfigCache {
     static SetCanAttack(sourceConfigId: string, targetConfigId: string, value: boolean): void {
         MaraUnitConfigCache.canAttackCache.set(sourceConfigId + targetConfigId, value);
         
-        Mara.Debug(`set ${sourceConfigId} can attack ${targetConfigId} to ${value}`);
+        if (MaraUnitConfigCache.DEBUG_CONFIG_PROPERTIES) {
+            Mara.Debug(`set ${sourceConfigId} can attack ${targetConfigId} to ${value}`);
+        }
     }
 
     private static addConfig(unitConfig: UnitConfig): MaraUnitConfigCacheItem {
