@@ -81,7 +81,7 @@ export class ExterminatingState extends ConstantProductionState {
 
     private selectTarget(enemy: Settlement): void {
         this.currentTarget = null;
-        let target = this.settlementController.StrategyController.GetOffensiveTarget(enemy);
+        let target = this.settlementController.StrategyController.GetOffenceTarget(enemy);
 
         if (target) {
             this.currentTarget = target;

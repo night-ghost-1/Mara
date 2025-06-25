@@ -30,6 +30,15 @@ class PathSelectItem implements NonUniformRandomSelectItem {
     Path: MaraPath;
 }
 
+class OffenseSelectItem implements NonUniformRandomSelectItem {
+    // @ts-ignore
+    Weight: number;
+    // @ts-ignore
+    Cluster: MaraSquad;
+    // @ts-ignore
+    Strength: number;
+}
+
 export class StrategySubcontroller extends MaraTaskableSubcontroller {
     protected onTaskSuccess(tickNumber: number): void {
         this.nextTaskAttemptTick = tickNumber + MaraUtils.Random(
@@ -183,7 +192,7 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
         return combatUnitCfgIds;
     }
 
-    GetOffensiveTarget(
+    GetOffenceTarget(
         enemySettlement: Settlement
     ): MaraUnitCacheItem | undefined {
         if (MaraUtils.IsSettlementDefeated(enemySettlement)) {
@@ -251,8 +260,11 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
             this.settlementController.Settings.UnitSearch.BuildingSearchRadius
         );
 
-        let mostVulnerableCluster: MaraSquad | null = null;
-        let minDefenceStrength = Infinity;
+        if (clusters.length == 0) {
+            return undefined;
+        }
+
+        let candidateClusters = new Array<OffenseSelectItem>();
 
         for (let cluster of clusters) {
             let location = cluster.GetLocation();
@@ -262,19 +274,29 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
                 location.Spread + this.settlementController.Settings.UnitSearch.ExpandEnemySearchRadius
             );
 
-            let strength = 0;
+            let candidateCluster = new OffenseSelectItem();
+            candidateCluster.Strength = 0;
+            candidateCluster.Cluster = cluster;
+            candidateClusters.push(candidateCluster);
 
             for (let enemy of enemies) {
-                strength += MaraUtils.GetUnitStrength(enemy);
-            }
-
-            if (strength < minDefenceStrength) {
-                minDefenceStrength = strength;
-                mostVulnerableCluster = cluster;
+                candidateCluster.Strength += MaraUtils.GetUnitStrength(enemy);
             }
         }
 
-        return mostVulnerableCluster?.Units[0];
+        let strongestCluster = MaraUtils.FindExtremum(candidateClusters, (c, e) => c.Strength - e.Strength)!;
+        let strengthNormalizationBase = Math.max(strongestCluster.Strength * 1.5, 1);
+
+        for (let candidate of candidateClusters) {
+            let weigthBase = 1 - (candidate.Strength / strengthNormalizationBase);
+            
+            candidate.Weight = Math.floor(100 * weigthBase);
+            this.Debug(`Candidate ${candidate.Cluster.Units[0].Unit.ToString()}, weigth: ${candidate.Weight}`);
+        }
+
+        let result = MaraUtils.NonUniformRandomSelect(this.settlementController.MasterMind, candidateClusters)!;
+
+        return result.Cluster.Units[0];
     }
 
     GetExpandOffenseTarget(expandLocation: MaraPoint): MaraUnitCacheItem | null {

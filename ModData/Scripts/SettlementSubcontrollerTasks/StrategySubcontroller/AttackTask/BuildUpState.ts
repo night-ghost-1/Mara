@@ -53,7 +53,7 @@ export class BuildUpState extends ProductionTaskState {
         let settlementLocation = this.settlementController.GetSettlementLocation();
 
         if (settlementLocation) {
-            let attackTarget = this.settlementController.StrategyController.GetOffensiveTarget(this.enemy);
+            let attackTarget = this.settlementController.StrategyController.GetOffenceTarget(this.enemy);
 
             if (attackTarget) {
                 let paths = MaraMap.GetPaths(settlementLocation.Center, attackTarget.UnitCell, [TileType.Water]);
