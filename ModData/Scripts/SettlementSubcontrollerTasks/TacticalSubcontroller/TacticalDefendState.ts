@@ -41,6 +41,10 @@ export class TacticalDefendState extends FsmState {
     Tick(tickNumber: number): void {
         if (tickNumber % 50 == 0) {
             this.refreshAttackersList();
+
+            if (!this.tacticalController.CanDefend()) {
+                this.tacticalController.MakeMilitia();
+            }
         }
 
         for (let squad of this.hostileAttackingSquads) {
@@ -51,10 +55,6 @@ export class TacticalDefendState extends FsmState {
 
         if (this.tacticalController.NeedRetreat(this.hostileAttackingSquads)) {
             this.tacticalController.Retreat();
-        }
-
-        if (!this.tacticalController.CanDefend()) {
-            this.tacticalController.MakeMilitia();
         }
 
         this.tacticalController.UpdateDefenseTargets(this.hostileAttackingSquads);

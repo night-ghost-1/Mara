@@ -206,7 +206,20 @@ export class TacticalSubcontroller extends MaraSubcontroller {
     }
 
     CanDefend(): boolean {
-        return this.AllSquads.length > 0;
+        if (this.AllSquads.length > 0) {
+            return true;
+        }
+
+        let offensiveItems = this.settlementController.StrategyController.GlobalStrategy.OffensiveCfgIds;
+        let produceableCfgIds = this.settlementController.ProductionController.GetProduceableCfgIds();
+        
+        for (let item of offensiveItems) {
+            if (produceableCfgIds.find((v) => v == item.CfgId)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     MakeMilitia(): void {
