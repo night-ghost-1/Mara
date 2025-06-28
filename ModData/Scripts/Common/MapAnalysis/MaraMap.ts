@@ -364,7 +364,7 @@ export class MaraMap {
         let unitMovementType = MaraUtils.GetConfigIdMoveType(unit.UnitCfgId);
 
         for (let cell of path) {
-            let cellKey = unitMovementType + cell.ToString();
+            let cellKey = `${unitMovementType}${cell.ToString()}`;
             
             let reachableCell = MaraMap.cellsCache.get(cellKey);
             

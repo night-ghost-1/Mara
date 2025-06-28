@@ -1015,6 +1015,42 @@ export class MaraUtils {
         return unitConfig.AllowedCommands.ContainsKey(UnitCommand.Repair);
     }
 
+    static IsShortSightedConfigId(cfgId: string): boolean {
+        return MaraUnitConfigCache.GetConfigProperty(cfgId, MaraUtils.isShortSightedConfig, "isShortSighted") as boolean;
+    }
+
+    private static isShortSightedConfig(unitConfig: UnitConfig): boolean {
+        return unitConfig.Sight <= 3;
+    }
+
+    static IsLongSightedConfigId(cfgId: string): boolean {
+        return MaraUnitConfigCache.GetConfigProperty(cfgId, MaraUtils.isLongSightedConfig, "isLongSighted") as boolean;
+    }
+
+    private static isLongSightedConfig(unitConfig: UnitConfig): boolean {
+        return unitConfig.Sight >= 5;
+    }
+
+    static IsCloseCombatConfigId(cfgId: string): boolean {
+        return MaraUnitConfigCache.GetConfigProperty(cfgId, MaraUtils.isCloseCombatConfig, "isCloseCombat") as boolean;
+    }
+
+    private static isCloseCombatConfig(unitConfig: UnitConfig): boolean {
+        return MaraUtils.isCombatConfig(unitConfig) && unitConfig.MainArmament.Range == 1;
+    }
+
+    static IsRangedAccurateConfigId(cfgId: string): boolean {
+        return MaraUnitConfigCache.GetConfigProperty(cfgId, MaraUtils.isRangedAccurateConfig, "isRangedAccurate") as boolean;
+    }
+
+    private static isRangedAccurateConfig(unitConfig: UnitConfig): boolean {
+        return (
+            MaraUtils.isCombatConfig(unitConfig) && 
+            unitConfig.MainArmament.Range > 1 &&
+            (unitConfig.MainArmament.DisableDispersion || unitConfig.MainArmament.BaseAccuracy >= 8)
+        );
+    }
+
     static GetAllSawmillConfigIds(settlement: Settlement): Array<string> {
         return MaraUtils.GetAllConfigIds(settlement, MaraUtils.isSawmillConfig, "isSawmillConfig");
     }
@@ -1119,33 +1155,41 @@ export class MaraUtils {
         return producedCfgIds;
     }
 
-    static GetConfigIdMoveType(cfgId: string): string {
-        return MaraUnitConfigCache.GetConfigProperty(cfgId, MaraUtils.configMoveType, "configMoveType") as string;
+    static GetConfigIdMoveType(cfgId: string): number {
+        return MaraUnitConfigCache.GetConfigProperty(cfgId, MaraUtils.configMoveType, "configMoveType") as number;
     }
 
-    private static configMoveType(unitConfig: UnitConfig): string {
+    private static configMoveType(unitConfig: UnitConfig): number {
         let unitCfgId = unitConfig.Uid;
-        let moveType = "";
-                
-        moveType += MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Grass) as number,  "GrassSpeed") as number);
-        moveType += MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Forest) as number, "ForestSpeed") as number);
-        moveType += MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Water) as number,  "WaterSpeed") as number);
-        moveType += MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Marsh) as number,  "MarshSpeed") as number);
-        moveType += MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Sand) as number,   "SandSpeed") as number);
-        moveType += MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Mounts) as number, "MountsSpeed") as number);
-        moveType += MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Road) as number,   "RoadSpeed") as number);
-        moveType += MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Ice) as number,    "IceSpeed") as number);
+        let moveType = 0;
+        
+        moveType |= MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Grass) as number,  "GrassSpeed") as number) << 1;
+        moveType |= MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Forest) as number, "ForestSpeed") as number) << 2;
+        moveType |= MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Water) as number,  "WaterSpeed") as number) << 3;
+        moveType |= MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Marsh) as number,  "MarshSpeed") as number) << 4;
+        moveType |= MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Sand) as number,   "SandSpeed") as number) << 5;
+        moveType |= MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Mounts) as number, "MountsSpeed") as number) << 6;
+        moveType |= MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Road) as number,   "RoadSpeed") as number) << 7;
+        moveType |= MaraUtils.speedToMoveTypeFlag(MaraUnitConfigCache.GetConfigProperty(unitCfgId, (cfg) => cfg.Speeds.Item.get(TileType.Ice) as number,    "IceSpeed") as number) << 8;
 
         return moveType;
     }
 
-    private static speedToMoveTypeFlag(speed: number): string {
+    private static speedToMoveTypeFlag(speed: number): number {
         if (speed > 0) {
-            return "1";
+            return 1;
         }
         else {
-            return "0";
+            return 0;
         }
+    }
+
+    static GetConfigIdGrassSpeed(cfgId: string): number {
+        return MaraUnitConfigCache.GetConfigProperty(cfgId, MaraUtils.configGrassSpeed, "grassSpeed") as number;
+    }
+
+    private static configGrassSpeed(unitConfig: UnitConfig): number {
+        return unitConfig.Speeds.Item.get(TileType.Grass)!
     }
     //#endregion
     
@@ -1201,6 +1245,18 @@ export class MaraUtils {
         }
 
         return array;
+    }
+
+    static CountRaisedBits(n: number): number {
+        let leftNumber = n;
+        let bitCount = 0;
+
+        while (leftNumber > 0) {
+            bitCount ++;
+            leftNumber &= leftNumber - 1;
+        }
+
+        return bitCount;
     }
 
     // Bresenham algorithm to pixelize straight lines are used here
