@@ -140,7 +140,11 @@ export class Mara {
 
                 if (player.IsBot) {
                     Mara.AttachToPlayer(item.index, processedSettlements, tickOffset);
-                    player.SetBotNickname(playerNames[playerIndex]);
+                    
+                    let oldPlayerName = player.Nickname;
+                    let newPlayerName = playerNames[playerIndex];
+                    player.SetBotNickname(newPlayerName);
+                    Mara.Info(`Changed player's name from '${oldPlayerName}' to '${newPlayerName}'`);
 
                     tickOffset ++;
                     playerIndex = (playerIndex + 1) % allPlayers.length;
