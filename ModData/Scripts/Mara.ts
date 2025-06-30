@@ -142,7 +142,7 @@ export class Mara {
                     Mara.AttachToPlayer(item.index, processedSettlements, tickOffset);
                     
                     let oldPlayerName = player.Nickname;
-                    let newPlayerName = playerNames[playerIndex];
+                    let newPlayerName = `[Мара] ${playerNames[playerIndex]}`;
                     player.SetBotNickname(newPlayerName);
                     Mara.Info(`Changed player's name from '${oldPlayerName}' to '${newPlayerName}'`);
 
