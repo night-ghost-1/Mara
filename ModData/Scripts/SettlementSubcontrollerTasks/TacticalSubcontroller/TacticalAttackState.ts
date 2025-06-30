@@ -44,11 +44,7 @@ export class TacticalAttackState extends FsmState {
             this.attackPath = [this.currentTarget.UnitCell];
         }
 
-        this.tacticalController.SettlementController.Debug(`Selected as attack path:`);
-        
-        for (let point of this.attackPath) {
-            this.tacticalController.SettlementController.Debug(point.ToString());
-        }
+        this.tacticalController.SettlementController.Debug(`Selected as attack path: ${this.attackPath.map((p) => p.ToString()).join(", ")}`);
 
         if (this.tacticalController.SettlementController.Settings.Squads.DebugSquads) {
             MaraUtils.DrawPath(this.attackPath, this.tacticalController.SettlementController.Settlement.SettlementColor);

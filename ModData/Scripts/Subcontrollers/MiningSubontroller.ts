@@ -52,6 +52,7 @@ class ResourceRequest {
 export class MiningSubcontroller extends MaraTaskableSubcontroller {
     readonly RESOURCE_THRESHOLD = 1000;
     readonly PEOPLE_THRESHOLD = 10;
+    readonly DEBUG_RESOURCE_CLUSTER_SEARCH = false;
     
     public Sawmills: Array<SawmillData> = [];
 
@@ -809,9 +810,12 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
             }
         });
 
-        this.Debug(`Candidate resource clusters:`);
-        for (let cluster of candidates) {
-            this.Debug(`(${cluster.Center.ToString()})`);
+        if (this.DEBUG_RESOURCE_CLUSTER_SEARCH) {
+            this.Debug(`Candidate resource clusters:`);
+            
+            for (let cluster of candidates) {
+                this.Debug(`(${cluster.Center.ToString()})`);
+            }
         }
 
         if (candidates.length > 0) {
