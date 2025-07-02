@@ -271,7 +271,7 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
             
             let enemies = this.GetEnemiesAroundPoint(
                 location.SpreadCenter, 
-                location.Spread + this.settlementController.Settings.UnitSearch.ExpandEnemySearchRadius
+                (location.Spread / 2) + this.settlementController.Settings.UnitSearch.ExpandEnemySearchRadius
             );
 
             let candidateCluster = new OffenseSelectItem();
@@ -296,7 +296,14 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
 
         let result = MaraUtils.NonUniformRandomSelect(this.settlementController.MasterMind, candidateClusters)!;
 
-        return result.Cluster.Units[0];
+        let buildings = result.Cluster.Units.filter((u) => MaraUtils.IsBuildingConfigId(u.UnitCfgId));
+
+        if (buildings.length > 0) {
+            return buildings[0];
+        }
+        else {
+            return result.Cluster.Units[0];
+        }
     }
 
     GetExpandOffenseTarget(expandLocation: MaraPoint): MaraUnitCacheItem | null {
