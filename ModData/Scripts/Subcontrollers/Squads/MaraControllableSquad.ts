@@ -56,10 +56,6 @@ export class MaraControllableSquad extends MaraSquad {
     }
 
     Tick(tickNumber: number): void {
-        if (tickNumber % 10 != 0) {
-            return;
-        }
-        
         this.location = null;
         this.cleanup();
         this.state.Tick(tickNumber);

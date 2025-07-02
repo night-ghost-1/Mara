@@ -19,8 +19,6 @@ export class MaraSquad {
     protected location: MaraSquadLocation | null = null;
 
     public get Strength(): number {
-        this.cleanup();
-        
         let strength = 0;
         
         for (let unit of this.Units) {
@@ -43,18 +41,12 @@ export class MaraSquad {
     }
 
     Tick(tickNumber: number): void {
-        if (tickNumber % 10 != 0) {
-            return;
-        }
-        
         this.location = null;
         this.cleanup();
     }
 
     GetLocation(): MaraSquadLocation {
         if (!this.location) {
-            this.cleanup();
-            
             if (this.Units.length > 0) {
                 let uppermostUnit: MaraUnitCacheItem | null = null;
                 let lowermostUnit: MaraUnitCacheItem | null = null;
@@ -125,8 +117,6 @@ export class MaraSquad {
     }
 
     IsAllUnitsIdle(): boolean {
-        this.cleanup();
-
         for (let unit of this.Units) {
             if (!unit.Unit.OrdersMind.IsIdle()) {
                 return false;
@@ -137,8 +127,6 @@ export class MaraSquad {
     }
 
     AddUnits(units: Array<MaraUnitCacheItem>): void {
-        this.cleanup();
-
         this.Units.push(...units);
         this.location = null;
 

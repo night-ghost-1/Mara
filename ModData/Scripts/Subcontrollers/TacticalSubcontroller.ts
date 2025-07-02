@@ -115,6 +115,16 @@ export class TacticalSubcontroller extends MaraSubcontroller {
     }
     
     Tick(tickNumber: number): void {
+        if (tickNumber % 10 != 0) {
+            return;
+        }
+
+        for (let squad of this.AllSquads) {
+            squad.Tick(tickNumber);
+        }
+
+        this.updateSquads();
+
         if (this.state) {
             this.state.Tick(tickNumber);
         }
@@ -129,14 +139,6 @@ export class TacticalSubcontroller extends MaraSubcontroller {
             this.nextState = null;
             this.Debug(`Tactical Subcontroller entering state ${this.state.constructor.name}, tick ${tickNumber}`);
             this.state.OnEntry();
-        }
-
-        for (let squad of this.AllSquads) {
-            squad.Tick(tickNumber);
-        }
-        
-        if (tickNumber % 10 == 0) {
-            this.updateSquads();
         }
     }
 

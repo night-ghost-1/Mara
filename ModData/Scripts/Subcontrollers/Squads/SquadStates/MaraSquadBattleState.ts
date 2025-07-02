@@ -96,10 +96,8 @@ export class MaraSquadBattleState extends MaraSquadState {
             return;
         }
 
-        if (tickNumber % 10 == 0) {
-            if (this.isAtLeastOneUnitAttacking()) {
-                this.lastNonKitedTick = tickNumber;
-            }
+        if (this.isAtLeastOneUnitAttacking()) {
+            this.lastNonKitedTick = tickNumber;
         }
 
         //if (tickNumber % 10 == 0) { // also micro
