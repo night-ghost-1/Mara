@@ -86,8 +86,10 @@ export class ProductionSubcontroller extends MaraSubcontroller {
 
         if (tickNumber % 50 == 0) {
             this.cleanupUnfinishedBuildings(tickNumber);
-            this.cleanupRepairRequests();
-            this.repairUnits();
+            
+            let repairZones = this.getRepairZones();
+            this.cleanupRepairRequests(repairZones);
+            this.repairUnits(repairZones);
         }
 
         this.productionIndex = null;
@@ -344,9 +346,7 @@ export class ProductionSubcontroller extends MaraSubcontroller {
         }
     }
 
-    private repairUnits(): void {
-        let repairZones = this.getRepairZones();
-        
+    private repairUnits(repairZones: Array<SettlementClusterLocation>): void {
         let unitsToRepair: Array<MaraUnitCacheItem> = this.getUnitsToRepair(repairZones);
         
         let availableResources = this.settlementController.MiningController.GetStashedResourses();
@@ -442,7 +442,7 @@ export class ProductionSubcontroller extends MaraSubcontroller {
         return result;
     }
 
-    private cleanupRepairRequests(): void {
+    private cleanupRepairRequests(repairZones: Array<SettlementClusterLocation>): void {
         let filteredRequests: Array<MaraRepairRequest> = [];
 
         for (let request of this.repairRequests) {
@@ -454,7 +454,19 @@ export class ProductionSubcontroller extends MaraSubcontroller {
                 this.finalizeRepairRequest(request);
             }
             else {
-                filteredRequests.push(request);
+                let isRequestFinalized = false;
+                
+                for (let zone of repairZones) {
+                    if (!MaraRect.IsRectsIntersect(zone.BoundingRect, request.Target.UnitRect)) {
+                        this.finalizeRepairRequest(request);
+                        isRequestFinalized = true;
+                        break;
+                    }
+                }
+                
+                if (!isRequestFinalized) {
+                    filteredRequests.push(request);
+                }
             }
         }
 

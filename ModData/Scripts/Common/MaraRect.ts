@@ -24,6 +24,15 @@ export class MaraRect {
         )
     }
 
+    static IsRectsIntersect(rect1: MaraRect, rect2: MaraRect): boolean {
+        return !(
+            rect1.TopLeft.X > rect2.BottomRight.X ||
+            rect1.TopLeft.Y > rect2.BottomRight.Y ||
+            rect1.BottomRight.X < rect2.TopLeft.X ||
+            rect1.BottomRight.Y < rect2.TopLeft.Y
+        )
+    }
+
     public get PerimeterCells(): Array<MaraPoint> {
         let result = new Array<MaraPoint>();
         
