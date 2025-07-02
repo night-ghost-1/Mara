@@ -31,7 +31,7 @@ export class MaraControllableSquad extends MaraSquad {
         return this.id;
     }
 
-    id: number;
+    private id: number;
 
     AttackPath: Array<MaraPoint> | null = null;
     MovementPath: Array<MaraPoint> | null = null;
@@ -189,8 +189,7 @@ export class MaraControllableSquad extends MaraSquad {
     }
 
     ToString(): string {
-        let result = `${this.id}`;        
-        return result;
+        return `${this.id}`;
     }
 
     public Debug(message: string): void {
