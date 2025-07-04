@@ -237,13 +237,15 @@ export class MaraUtils {
         radius: number,
         settelements?: Array<Settlement>,
         unitFilter?: (unit: MaraUnitCacheItem) => boolean,
-        includeUnalive?: boolean
+        includeUnalive?: boolean,
+        includeBlocking?: boolean
     ): Array<MaraUnitCacheItem> {
         return MaraUtils.GetSettlementUnitsInArea(
             MaraRect.CreateFromPoint(point, radius),
             settelements,
             unitFilter,
-            includeUnalive
+            includeUnalive,
+            includeBlocking
         );
     }
     
@@ -251,7 +253,8 @@ export class MaraUtils {
         rect: MaraRect,
         settelements?: Array<Settlement>,
         unitFilter?: (unit: MaraUnitCacheItem) => boolean,
-        includeUnalive?: boolean
+        includeUnalive?: boolean,
+        includeBlocking?: boolean
     ): Array<MaraUnitCacheItem> {
         let units: Array<MaraUnitCacheItem>;
 
@@ -265,7 +268,10 @@ export class MaraUtils {
         units = units.filter((cacheItem) => {
             return (
                 (cacheItem.Unit.IsAlive || includeUnalive) && 
-                MaraUtils.IsActiveConfigId(cacheItem.UnitCfgId)
+                (
+                    MaraUtils.IsActiveConfigId(cacheItem.UnitCfgId) ||
+                    (MaraUtils.IsBlockingConfigId(cacheItem.UnitCfgId) && includeBlocking)
+                )
             );
         });
 
@@ -992,11 +998,19 @@ export class MaraUtils {
     }
 
     static IsWalkableConfigId(cfgId: string): boolean {
-        return MaraUnitConfigCache.GetConfigProperty(cfgId, MaraUtils.isWalkableConfig, "IsWalkableConfig") as boolean;
+        return MaraUnitConfigCache.GetConfigProperty(cfgId, MaraUtils.isWalkableConfig, "isWalkableConfig") as boolean;
     }
 
     private static isWalkableConfig(unitConfig: UnitConfig): boolean {
         return unitConfig.BuildingConfig != null && unitConfig.HasFlags(UnitFlags.Walkable);
+    }
+
+    static IsBlockingConfigId(cfgId: string): boolean {
+        return MaraUnitConfigCache.GetConfigProperty(cfgId, MaraUtils.isBlockingConfig, "isBlockingConfig") as boolean;
+    }
+
+    private static isBlockingConfig(unitConfig: UnitConfig): boolean {
+        return unitConfig.BuildingConfig != null && !MaraUtils.isActiveConfig(unitConfig) && !MaraUtils.isWalkableConfig(unitConfig);
     }
 
     static IsReparableConfigId(cfgId: string): boolean {

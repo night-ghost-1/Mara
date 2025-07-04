@@ -10,6 +10,7 @@ import { MaraMap } from "../../../Common/MapAnalysis/MaraMap";
 import { MaraUnitCacheItem } from "../../../Common/Cache/MaraUnitCacheItem";
 import { MaraUnitConfigCache } from "../../../Common/Cache/MaraUnitConfigCache";
 import { IMaraPoint } from "../../../Common/IMaraPoint";
+import { MaraControllableSquad } from "../MaraControllableSquad";
 
 class MaraThreatMap extends MaraCellDataHolder {
     constructor () {
@@ -75,6 +76,20 @@ export class MaraSquadBattleState extends MaraSquadState {
     private initialLocation: MaraSquadLocation | null = null;
     private lastNonKitedTick: number = Infinity;
     private initialEnemyLocation: MaraPoint | null = null;
+
+    private isEnrageMode: boolean;
+    private enrageEndTick: number;
+
+    constructor(squad: MaraControllableSquad, isEnrageMode: boolean = false) {
+        super(squad);
+
+        this.isEnrageMode = isEnrageMode;
+        this.enrageEndTick = 0;
+
+        if (this.isEnrageMode) {
+            this.squad.Debug(`Enrage attack mode activated`);
+        }
+    }
     
     OnEntry(): void {
         this.updateThreats();
@@ -94,6 +109,18 @@ export class MaraSquadBattleState extends MaraSquadState {
         if (this.squad.MovementPath != null) {
             this.squad.SetState(new MaraSquadMoveState(this.squad));
             return;
+        }
+
+        if (this.enrageEndTick == 0) {
+            this.enrageEndTick = tickNumber + MaraUtils.Random(
+                this.squad.Controller.SettlementController.MasterMind,
+                this.squad.Controller.SquadsSettings.MaxEnrageDuration,
+                this.squad.Controller.SquadsSettings.MinEnrageDuration
+            );
+        }
+
+        if (this.isEnrageMode && tickNumber > this.enrageEndTick) {
+            this.isEnrageMode = false;
         }
 
         if (this.isAtLeastOneUnitAttacking()) {
@@ -152,7 +179,9 @@ export class MaraSquadBattleState extends MaraSquadState {
             location.Point, 
             this.squad.Controller.SquadsSettings.EnemySearchRadius, 
             this.squad.Controller.EnemySettlements,
-            (unit) => {return MaraUtils.ChebyshevDistance(unit.UnitCell, location.Point) <= this.squad.Controller.SquadsSettings.EnemySearchRadius}
+            (unit) => {return MaraUtils.ChebyshevDistance(unit.UnitCell, location.Point) <= this.squad.Controller.SquadsSettings.EnemySearchRadius},
+            false,
+            this.isEnrageMode
         );
 
         this.enemySquads = MaraUtils.GetSettlementsSquadsFromUnits(
@@ -160,6 +189,13 @@ export class MaraSquadBattleState extends MaraSquadState {
             this.squad.Controller.EnemySettlements,
             (unit) => {return MaraUtils.ChebyshevDistance(unit.UnitCell, location.Point) <= this.squad.Controller.SquadsSettings.EnemySearchRadius}
         );
+
+        let blockingUnits = enemies.filter((u) => MaraUtils.IsBlockingConfigId(u.UnitCfgId));
+
+        if (blockingUnits.length > 0) {
+            let blockingSquad = new MaraSquad(blockingUnits);
+            this.enemySquads.push(blockingSquad);
+        }
 
         this.enemyUnits = [];
 
@@ -465,10 +501,29 @@ export class MaraSquadBattleState extends MaraSquadState {
     }
 
     private distributeTargets_liter(): void {
+        let occupiedUnitsCache: any = {};
+        
+        if (this.isEnrageMode) {
+            let blockingUnits = this.enemyUnits.filter((u) => MaraUtils.IsBlockingConfigId(u.UnitCfgId));
+
+            if (blockingUnits.length > 0) {
+                for (let blocker of blockingUnits) {
+                    for (let unit of this.squad.Units) {
+                        if (!occupiedUnitsCache[unit.UnitId] && MaraUtils.CanAttack(unit, blocker)) {
+                            MaraUtils.IssueAttackCommand([unit], this.squad.Controller.Player, blocker.UnitCell, true, false);
+                            occupiedUnitsCache[unit.UnitId] = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
         let attackCell = this.enemySquads[0].GetLocation().Point;
 
         if (attackCell) {
-            MaraUtils.IssueAttackCommand(this.squad.Units, this.squad.Controller.Player, attackCell);
+            let freeUnits = this.squad.Units.filter((u) => !occupiedUnitsCache[u.UnitId]);
+            MaraUtils.IssueAttackCommand(freeUnits, this.squad.Controller.Player, attackCell);
         }
     }
 

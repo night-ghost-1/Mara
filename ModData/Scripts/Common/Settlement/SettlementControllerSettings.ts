@@ -76,9 +76,16 @@ class SquadsSettings {
     public DefaultMovementPrecision: number = 3;
     public KiteTimeout: number = 8 * 50;
     public KiteThresholdPositionChangeDistance: number = 5;
-    public GatherUpTimeout = 5 * 50;
+    public GatherUpTimeout: number = 5 * 50;
 
-    public DebugSquads: boolean = false;
+    public MinEnrageActivationTimeout: number = 10 * 50;
+    public MaxEnrageActivationTimeout: number = 20 * 50;
+    public MinEnrageCooldown: number = 10 * 50;
+    public MaxEnrageCooldown: number = 30 * 50;
+    public MinEnrageDuration: number = 10 * 50;
+    public MaxEnrageDuration: number = 20 * 50;
+
+    public DebugSquads: boolean = true;
 }
 
 class ControllerStatesSettings {

@@ -164,13 +164,14 @@ export class MaraControllableSquad extends MaraSquad {
         return enemies.length > 0;
     }
 
-    GetNearbyUnits(): Array<MaraUnitCacheItem> {
+    GetNearbyUnits(includeBlocking: boolean): Array<MaraUnitCacheItem> {
         let units = MaraUtils.GetSettlementUnitsAroundPoint(
             this.GetLocation().Point, 
             this.Controller.SquadsSettings.EnemySearchRadius,
             undefined,
             (unit) => true,
-            true
+            true,
+            includeBlocking
         );
 
         return units;

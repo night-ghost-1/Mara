@@ -8,6 +8,9 @@ import { MaraSquadCaptureState } from "./MaraSquadCaptureState";
 import { MaraUnitCacheItem } from "../../../Common/Cache/MaraUnitCacheItem";
 
 export class MaraSquadAttackState extends MaraSquadState {
+    private isEnrageMode = true; // 'true' so that it switches to 'false' on first Tick() run
+    private enrageSwitchTick: number = 0;
+    
     OnEntry(): void {
         this.initiateAttack();
     }
@@ -15,13 +18,34 @@ export class MaraSquadAttackState extends MaraSquadState {
     OnExit(): void {}
 
     Tick(tickNumber: number): void {
-        let nearbyUnits = this.squad.GetNearbyUnits();
+        if (this.enrageSwitchTick < tickNumber) {
+            if (!this.isEnrageMode) {
+                this.enrageSwitchTick = MaraUtils.Random(
+                    this.squad.Controller.SettlementController.MasterMind,
+                    this.squad.Controller.SquadsSettings.MaxEnrageActivationTimeout,
+                    this.squad.Controller.SquadsSettings.MinEnrageActivationTimeout
+                );
+            }
+            else {
+                this.enrageSwitchTick = MaraUtils.Random(
+                    this.squad.Controller.SettlementController.MasterMind,
+                    this.squad.Controller.SquadsSettings.MaxEnrageCooldown,
+                    this.squad.Controller.SquadsSettings.MinEnrageCooldown
+                );
+            }
+
+            this.enrageSwitchTick += tickNumber;
+            this.isEnrageMode = !this.isEnrageMode;
+            this.squad.Debug(`Enrage mode ${this.isEnrageMode ? "activated" : "deactivated"}, next switch tick: ${this.enrageSwitchTick}`);
+        }
+        
+        let nearbyUnits = this.squad.GetNearbyUnits(this.isEnrageMode);
         
         if (this.isEnemyNearby(nearbyUnits)) {
             let enemyUnits = nearbyUnits.filter(u => this.isEnemyUnit(u));
 
             if (this.squad.CanAttackAtLeastOneUnit(enemyUnits)) {
-                this.squad.SetState(new MaraSquadBattleState(this.squad));
+                this.squad.SetState(new MaraSquadBattleState(this.squad, this.isEnrageMode));
                 return;
             }
         }
