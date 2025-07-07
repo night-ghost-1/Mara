@@ -6,10 +6,18 @@ import { MaraSquadIdleState } from "./MaraSquadIdleState";
 import { MaraSquadAttackGatheringUpState } from "./MaraSquadAttackGatheringUpState";
 import { MaraSquadCaptureState } from "./MaraSquadCaptureState";
 import { MaraUnitCacheItem } from "../../../Common/Cache/MaraUnitCacheItem";
+import { MaraControllableSquad } from "../MaraControllableSquad";
 
 export class MaraSquadAttackState extends MaraSquadState {
     private isEnrageMode = true; // 'true' so that it switches to 'false' on first Tick() run
     private enrageSwitchTick: number = 0;
+
+    constructor(squad: MaraControllableSquad, isEnrageMode: boolean = true, enrageSwitchTick: number = 0) {
+        super(squad);
+        
+        this.isEnrageMode = isEnrageMode;
+        this.enrageSwitchTick = enrageSwitchTick;
+    }
     
     OnEntry(): void {
         this.initiateAttack();
@@ -64,7 +72,7 @@ export class MaraSquadAttackState extends MaraSquadState {
 
         if (tickNumber % (5 * 50) == 0) { //5 sec
             if (location.Spread > this.squad.MinSpread * this.squad.Controller.SquadsSettings.MaxSpreadMultiplier) {
-                this.squad.SetState(new MaraSquadAttackGatheringUpState(this.squad));
+                this.squad.SetState(new MaraSquadAttackGatheringUpState(this.squad, this.isEnrageMode, this.enrageSwitchTick));
                 return;
             }
         }
