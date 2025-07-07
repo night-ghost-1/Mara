@@ -74,6 +74,7 @@ export class TacticalSubcontroller extends MaraSubcontroller {
     private state: FsmState;
     // @ts-ignore
     private nextState: FsmState | null;
+    private isLastCommandExecuted: boolean = false;
 
     constructor (parent: MaraSettlementController) {
         super(parent);
@@ -113,6 +114,10 @@ export class TacticalSubcontroller extends MaraSubcontroller {
     public get AllSquads(): Array<MaraControllableSquad> {
         return [...this.OffensiveSquads, ...this.DefensiveSquads, ...this.ReinforcementSquads, ...this.MilitiaSquads];
     }
+
+    public get IsLastCommandExecuted(): boolean {
+        return this.isLastCommandExecuted;
+    }
     
     Tick(tickNumber: number): void {
         if (tickNumber % 10 != 0) {
@@ -139,11 +144,13 @@ export class TacticalSubcontroller extends MaraSubcontroller {
             this.nextState = null;
             this.Debug(`Tactical Subcontroller entering state ${this.state.constructor.name}, tick ${tickNumber}`);
             this.state.OnEntry();
+            this.isLastCommandExecuted = true;
         }
     }
 
     private setState(state: FsmState): void {
         this.nextState = state;
+        this.isLastCommandExecuted = false;
     }
 
     Attack(target: MaraUnitCacheItem): void {

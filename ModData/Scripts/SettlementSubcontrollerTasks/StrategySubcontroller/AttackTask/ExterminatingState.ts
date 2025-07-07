@@ -41,6 +41,10 @@ export class ExterminatingState extends ConstantProductionState {
             return;
         }
 
+        if (!this.settlementController.TacticalController.IsLastCommandExecuted) {
+            return;
+        }
+
         this.cleanupProductionRequests();
         this.requestProduction();
 
