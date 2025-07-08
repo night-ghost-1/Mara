@@ -507,6 +507,18 @@ export class MaraSquadBattleState extends MaraSquadState {
             let blockingUnits = this.enemyUnits.filter((u) => MaraUtils.IsBlockingConfigId(u.UnitCfgId));
 
             if (blockingUnits.length > 0) {
+                let sortingData = blockingUnits.map(
+                    (u) => { 
+                        return {
+                            Distance: MaraUtils.ChebyshevDistance(u.UnitRect.Center, this.squad.GetLocation().Point), 
+                            Unit: u
+                        }
+                    }
+                );
+
+                sortingData.sort((a, b) => a.Distance - b.Distance);
+                blockingUnits = sortingData.map((d) => d.Unit);
+                
                 for (let blocker of blockingUnits) {
                     for (let unit of this.squad.Units) {
                         if (!occupiedUnitsCache[unit.UnitId] && MaraUtils.CanAttack(unit, blocker)) {
