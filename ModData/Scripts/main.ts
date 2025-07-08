@@ -31,7 +31,7 @@ export class MaraPlugin extends HordePluginBase {
         "Верещаг"
     ];
     
-    private reproducingMode: boolean = false;
+    private isReproducingMode: boolean = false;
 
     public constructor() {
         super(DISPLAY_NAME);
@@ -39,7 +39,7 @@ export class MaraPlugin extends HordePluginBase {
 
     public onFirstRun() {
         this.log.logLevel = LogLevel.Debug;
-        this.reproducingMode = HordeResurrection.Engine.Logic.Main.MainController.HordeSettings.ReplaySettings.BotReproducingMode;
+        this.isReproducingMode = HordeResurrection.Engine.Logic.Main.MainController.HordeSettings.ReplaySettings.BotReproducingMode;
 
         let playerNames = MaraUtils.ShuffleArray(new Array(...MaraPlugin.playerNames));
         let allPlayers = MaraUtils.GetAllPlayers();
@@ -56,11 +56,11 @@ export class MaraPlugin extends HordePluginBase {
             }
         }
 
-        if (!isReplayMode() || this.reproducingMode) {
+        if (!isReplayMode() || this.isReproducingMode) {
             Mara.FirstRun(this.log);
         }
 
-        if (isReplayMode() && this.reproducingMode) {
+        if (isReplayMode() && this.isReproducingMode) {
             Mara.Info(`** Mara started in reproducing mode **`);
         }
     }
@@ -68,7 +68,7 @@ export class MaraPlugin extends HordePluginBase {
     public onEveryTick(gameTickNum: number) {
         this.mineResources(gameTickNum);
 
-        if (!isReplayMode() || this.reproducingMode) {
+        if (!isReplayMode() || this.isReproducingMode) {
             Mara.Tick(gameTickNum);
         }
     }
