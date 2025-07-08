@@ -253,11 +253,14 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
             }
         }
 
+        const buildingSearchRadius = this.settlementController.Settings.UnitSearch.BuildingSearchRadius;
+        let distanceLimiters = candidates.map((c) => MaraRect.CreateFromPoint(c.UnitRect.Center, 2 * buildingSearchRadius));
+
         let clusters = MaraUtils.GetSettlementsSquadsFromUnits(
             candidates, 
             [enemySettlement], 
-            (unit) => true,
-            this.settlementController.Settings.UnitSearch.BuildingSearchRadius
+            (unit) => distanceLimiters.some((l) => l.IsPointInside(unit.UnitRect.Center)),
+            buildingSearchRadius
         );
 
         if (clusters.length == 0) {
