@@ -33,24 +33,6 @@ export class Mara {
     
     static CanRun = true;
     static Logger: Logger;
-
-    private static readonly playerNames = [
-        "Рогволод",
-        "Воибуд",
-        "Судимир",
-        "Молчан",
-        "Доброжир",
-        "Ярополк",
-        "Псой",
-        "Агапий",
-        "Харитон",
-        "Доброгнев",
-        "Фотий",
-        "Феофан",
-        "Добромысл",
-        "Доброслав",
-        "Верещаг"
-    ];
     
     private static controllers: Array<MaraSettlementController> = [];
     private static pathfinder: PathFinder;
@@ -131,8 +113,6 @@ export class Mara {
 
             let tickOffset = 0;
             let processedSettlements: Array<Settlement> = [];
-            let playerIndex = 0;
-            let playerNames = MaraUtils.ShuffleArray(new Array(...Mara.playerNames));
             let allPlayers = MaraUtils.GetAllPlayers();
 
             for (let item of allPlayers) {
@@ -140,14 +120,7 @@ export class Mara {
 
                 if (player.IsBot) {
                     Mara.AttachToPlayer(item.index, processedSettlements, tickOffset);
-                    
-                    let oldPlayerName = player.Nickname;
-                    let newPlayerName = `[Мара] ${playerNames[playerIndex]}`;
-                    player.SetBotNickname(newPlayerName);
-                    Mara.Info(`Changed player's name from '${oldPlayerName}' to '${newPlayerName}'`);
-
                     tickOffset ++;
-                    playerIndex = (playerIndex + 1) % allPlayers.length;
                 }
             }
         }

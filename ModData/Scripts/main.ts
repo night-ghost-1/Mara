@@ -4,6 +4,7 @@ import { Mara } from "./Mara";
 import { createResourcesAmount } from "library/common/primitives";
 import { isReplayMode } from "library/game-logic/game-tools";
 import { LogLevel } from "library/common/logging";
+import { MaraUtils } from "./MaraUtils";
 
 const DISPLAY_NAME = "Mara";
 
@@ -12,6 +13,24 @@ export function onInitialization() {
 }
 
 export class MaraPlugin extends HordePluginBase {
+    private static readonly playerNames = [
+        "Рогволод",
+        "Воибуд",
+        "Судимир",
+        "Молчан",
+        "Доброжир",
+        "Ярополк",
+        "Псой",
+        "Агапий",
+        "Харитон",
+        "Доброгнев",
+        "Фотий",
+        "Феофан",
+        "Добромысл",
+        "Доброслав",
+        "Верещаг"
+    ];
+    
     private reproducingMode: boolean = false;
 
     public constructor() {
@@ -21,6 +40,21 @@ export class MaraPlugin extends HordePluginBase {
     public onFirstRun() {
         this.log.logLevel = LogLevel.Debug;
         this.reproducingMode = HordeResurrection.Engine.Logic.Main.MainController.HordeSettings.ReplaySettings.BotReproducingMode;
+
+        let playerNames = MaraUtils.ShuffleArray(new Array(...MaraPlugin.playerNames));
+        let allPlayers = MaraUtils.GetAllPlayers();
+        let playerIndex = 0;
+
+        for (let item of allPlayers) {
+            let player = Players[item.index];
+
+            if (player.IsBot) {
+                let oldPlayerName = player.Nickname;
+                let newPlayerName = `[Мара] ${playerNames[playerIndex]}`;
+                player.SetBotNickname(newPlayerName);
+                this.log.info(`Mara changed player's name from '${oldPlayerName}' to '${newPlayerName}'`);
+            }
+        }
 
         if (!isReplayMode() || this.reproducingMode) {
             Mara.FirstRun(this.log);
