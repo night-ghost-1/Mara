@@ -53,7 +53,8 @@ export class MaraPlugin extends HordePluginBase {
                 let newPlayerName = `[Мара] ${playerNames[playerIndex]}`;
                 player.SetBotNickname(newPlayerName);
                 this.log.info(`Mara changed player's name from '${oldPlayerName}' to '${newPlayerName}'`);
-                playerIndex ++;
+                
+                playerIndex = (playerIndex + 1) % allPlayers.length;
             }
         }
 
