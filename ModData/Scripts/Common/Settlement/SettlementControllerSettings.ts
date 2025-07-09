@@ -121,7 +121,7 @@ class CombatSettings {
     public MaxUsedOffensiveCfgIdCount: number = 4;
     public MaxUsedDefensiveCfgIdCount: number = 1;
     
-    public OffensiveToDefensiveRatios: Array<number> = [1, 0.75, 0.5, 0.25, 0];
+    public OffensiveToDefensiveRatios: Array<number> = [1, 0.75, 0.5, 0.25, 0.1];
     public AttackStrengthToEnemyStrengthRatio: number = 1.5;
     public UnitSpeedClusterizationThresholds: Array<number> = [9, 14]; //this must be in ascending order
 }
