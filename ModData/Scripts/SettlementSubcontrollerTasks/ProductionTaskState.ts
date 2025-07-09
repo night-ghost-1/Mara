@@ -24,6 +24,7 @@ export abstract class ProductionTaskState extends SubcontrollerTaskState {
     
     OnEntry(): void {
         if (!this.onEntry()) {
+            this.task.Complete(false);
             return;
         }
         
