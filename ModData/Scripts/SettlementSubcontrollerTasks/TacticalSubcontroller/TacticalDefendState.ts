@@ -45,19 +45,19 @@ export class TacticalDefendState extends FsmState {
             if (!this.tacticalController.CanDefend()) {
                 this.tacticalController.MakeMilitia();
             }
+
+            this.tacticalController.ReinforceSquads();
+
+            if (this.tacticalController.NeedRetreat(this.hostileAttackingSquads)) {
+                this.tacticalController.Retreat();
+            }
+
+            this.tacticalController.UpdateDefenseTargets(this.hostileAttackingSquads);
         }
 
         for (let squad of this.hostileAttackingSquads) {
             squad.Tick(tickNumber);
         }
-        
-        this.tacticalController.ReinforceSquads();
-
-        if (this.tacticalController.NeedRetreat(this.hostileAttackingSquads)) {
-            this.tacticalController.Retreat();
-        }
-
-        this.tacticalController.UpdateDefenseTargets(this.hostileAttackingSquads);
     }
 
     private registerHostileSquadsAroundPoint(point: MaraPoint, radius: number): Array<MaraSquad> {
