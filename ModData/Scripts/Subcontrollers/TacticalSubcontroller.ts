@@ -77,7 +77,7 @@ export class TacticalSubcontroller extends MaraSubcontroller {
 
     constructor (parent: MaraSettlementController) {
         super(parent);
-        this.Idle();
+        this.switchState(new TacticalIdleState(this));
     }
 
     public get Player(): Player {
@@ -132,16 +132,7 @@ export class TacticalSubcontroller extends MaraSubcontroller {
         }
         
         if (this.nextState) {
-            if (this.state) {
-                this.Debug(`Tactical Subcontroller leaving state ${this.state.constructor.name}`);
-                this.state.OnExit();
-            }
-            
-            this.state = this.nextState;
-            this.nextState = null;
-            this.Debug(`Tactical Subcontroller entering state ${this.state.constructor.name}, tick ${tickNumber}`);
-            this.state.OnEntry();
-            this.isLastCommandExecuted = true;
+            this.switchState(this.nextState);
         }
     }
 
@@ -451,6 +442,19 @@ export class TacticalSubcontroller extends MaraSubcontroller {
                 defendingSquadGroup = [];
             }
         }
+    }
+
+    private switchState(nextState: FsmState): void {
+        if (this.state) {
+            this.Debug(`Tactical Subcontroller leaving state ${this.state.constructor.name}`);
+            this.state.OnExit();
+        }
+        
+        this.state = nextState;
+        this.nextState = null;
+        this.Debug(`Tactical Subcontroller entering state ${this.state.constructor.name}`);
+        this.state.OnEntry();
+        this.isLastCommandExecuted = true;
     }
 
     private getWeakestReinforceableSquad(squadMovementType: string, checkReinforcements: boolean): MaraControllableSquad | null {
