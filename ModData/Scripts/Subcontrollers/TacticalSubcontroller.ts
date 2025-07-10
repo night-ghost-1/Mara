@@ -8,7 +8,6 @@ import { MaraPoint } from "../Common/MaraPoint";
 import { MaraUnitCacheItem } from "../Common/Cache/MaraUnitCacheItem";
 import { MaraUnitConfigCache } from "../Common/Cache/MaraUnitConfigCache";
 import { Player, Settlement, UnitConfig } from "library/game-logic/horde-types";
-import { MaraMap } from "../Common/MapAnalysis/MaraMap";
 import { FsmState } from "../Common/FiniteStateMachine/FsmState";
 import { TacticalAttackState } from "../SettlementSubcontrollerTasks/TacticalSubcontroller/TacticalAttackState";
 import { TacticalDefendState } from "../SettlementSubcontrollerTasks/TacticalSubcontroller/TacticalDefendState";
@@ -334,21 +333,7 @@ export class TacticalSubcontroller extends MaraSubcontroller {
         this.Debug(`Issuing attack command`);
 
         for (let squad of this.OffensiveSquads) {
-            this.SendSquadToAttack(squad, attackPath);
-        }
-    }
-
-    SendSquadToAttack(squad: MaraControllableSquad, path: Array<MaraPoint>): void {
-        if (path.length > 2) {
-            // first and last cells are excluded since they usually will be different for all paths
-            let pathBody = path.slice(1, path.length - 2);
-            let updatedPathBody = MaraMap.UpdatePathForUnit(squad.Units[0], pathBody);
-
-            let updatedPath = [path[0], ...updatedPathBody, path[path.length - 1]];
-            squad.Attack(updatedPath);
-        }
-        else {
-            squad.Attack(path);
+            squad.Attack(attackPath);
         }
     }
 

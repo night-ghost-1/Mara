@@ -48,7 +48,7 @@ export class MaraSquadMoveState extends MaraSquadState {
 
             if (
                 !this.squad.CurrentMovementPoint ||
-                this.squad.CurrentMovementPoint == this.squad.CurrentPath![this.squad.CurrentPath!.length - 1]
+                this.squad.CurrentMovementPoint == this.squad.CurrentPath![this.squad.CurrentPath!.length - 1].Point
             ) {
                 this.squad.SetState(new MaraSquadIdleState(this.squad));
             }

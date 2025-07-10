@@ -85,7 +85,7 @@ class SquadsSettings {
     public MinEnrageDuration: number = 15 * 50;
     public MaxEnrageDuration: number = 25 * 50;
 
-    public DebugSquads: boolean = false;
+    public DebugSquads: boolean = true;
 }
 
 class ControllerStatesSettings {

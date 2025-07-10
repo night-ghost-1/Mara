@@ -39,7 +39,7 @@ export abstract class MaraSquadState extends FsmState {
 
     protected resumeAttackMovement(isEnrageMode?: boolean, enrageSwitchTick?: number): void {
         if (!this.squad.AttackPath) {
-            this.squad.Attack(this.squad.CurrentPath!);
+            this.squad.ResumeAttack(this.squad.CurrentPath!);
         }
 
         let attackState: MaraSquadAttackState;

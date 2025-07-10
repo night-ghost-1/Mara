@@ -5,6 +5,17 @@ import { MaraSquadIdleState } from "./SquadStates/MaraSquadIdleState";
 import { MaraSquadState } from "./SquadStates/MaraSquadState";
 import { MaraPoint } from "../../Common/MaraPoint";
 import { MaraUnitCacheItem } from "../../Common/Cache/MaraUnitCacheItem";
+import { MaraMap } from "../../Common/MapAnalysis/MaraMap";
+
+class MovementItem {
+    Point: MaraPoint;
+    IsPointUpdated: boolean;
+
+    constructor(point: MaraPoint) {
+        this.Point = point;
+        this.IsPointUpdated = false;
+    }
+}
 
 export class MaraControllableSquad extends MaraSquad {
     static IdSequence: number = 0;
@@ -33,9 +44,9 @@ export class MaraControllableSquad extends MaraSquad {
 
     private id: number;
 
-    AttackPath: Array<MaraPoint> | null = null;
-    MovementPath: Array<MaraPoint> | null = null;
-    CurrentPath: Array<MaraPoint> | null = null;
+    AttackPath: Array<MovementItem> | null = null;
+    MovementPath: Array<MovementItem> | null = null;
+    CurrentPath: Array<MovementItem> | null = null;
     CurrentMovementPoint: MaraPoint | null = null;
     MovementPrecision: number = 0;
 
@@ -62,13 +73,18 @@ export class MaraControllableSquad extends MaraSquad {
     }
 
     Attack(path: Array<MaraPoint>, precision?: number): void {
+        let attackPath = path.map((p) => new MovementItem(p));
+        this.ResumeAttack(attackPath, precision);
+    }
+
+    ResumeAttack(path: Array<MovementItem>, precision?: number): void {
         this.AttackPath = path;
         this.MovementPath = null;
         this.MovementPrecision = precision ? precision : this.controller.SquadsSettings.DefaultMovementPrecision;
     }
 
     Move(path: Array<MaraPoint>, precision?: number): void {
-        this.MovementPath = path;
+        this.MovementPath = path.map((p) => new MovementItem(p));;
         this.AttackPath = null;
         this.MovementPrecision = precision ? precision : this.controller.SquadsSettings.DefaultMovementPrecision;
     }
@@ -80,7 +96,7 @@ export class MaraControllableSquad extends MaraSquad {
             return null;
         }
         else {
-            this.Debug(`current path is ${this.CurrentPath.map((p) => p.ToString()).join(", ")}`);
+            this.Debug(`current path is ${this.CurrentPath.map((p) => p.Point.ToString()).join(", ")}`);
         }
 
         let location = this.GetLocation();
@@ -88,7 +104,7 @@ export class MaraControllableSquad extends MaraSquad {
         let startIndex = 0;
 
         for (let i = 0; i < this.CurrentPath.length; i ++) {
-            let distance = MaraUtils.ChebyshevDistance(this.CurrentPath[i], location.Point);
+            let distance = MaraUtils.ChebyshevDistance(this.CurrentPath[i].Point, location.Point);
 
             if (distance <= this.MovementPrecision) {
                 startIndex = i + 1;
@@ -101,7 +117,7 @@ export class MaraControllableSquad extends MaraSquad {
         let closestDistance = Infinity;
 
         for (let i = startIndex; i < this.CurrentPath.length; i ++) {
-            let distance = MaraUtils.ChebyshevDistance(this.CurrentPath[i], location.Point);
+            let distance = MaraUtils.ChebyshevDistance(this.CurrentPath[i].Point, location.Point);
             
             if (distance <= closestDistance) {
                 closestPointIndex = i;
@@ -117,26 +133,43 @@ export class MaraControllableSquad extends MaraSquad {
         this.Debug(`closest point index = ${closestPointIndex}`);
 
         if (closestPointIndex >= this.CurrentPath.length - 1) {
-            this.Debug(`next point = ${this.CurrentPath[closestPointIndex].ToString()}`);
-            return this.CurrentPath[closestPointIndex];
+            this.Debug(`next point = ${this.CurrentPath[closestPointIndex].Point.ToString()}`);
+            return this.CurrentPath[closestPointIndex].Point;
         }
 
-        let closestPoint = this.CurrentPath[closestPointIndex];
-        let nextPoint = this.CurrentPath[closestPointIndex + 1];
+        let closestPointItem = this.CurrentPath[closestPointIndex];
+        let nextPointItem = this.CurrentPath[closestPointIndex + 1];
 
-        let straigthDistance = MaraUtils.ChebyshevDistance(location.Point, nextPoint);
+        let straigthDistance = MaraUtils.ChebyshevDistance(location.Point, nextPointItem.Point);
         let closestPointDistance = 
-            MaraUtils.ChebyshevDistance(location.Point, closestPoint) + 
-            MaraUtils.ChebyshevDistance(closestPoint, nextPoint);
+            MaraUtils.ChebyshevDistance(location.Point, closestPointItem.Point) + 
+            MaraUtils.ChebyshevDistance(closestPointItem.Point, nextPointItem.Point);
 
+        let finalPointItem: MovementItem;
+        
         if (straigthDistance < closestPointDistance) {
-            this.Debug(`next point = ${nextPoint.ToString()}`);
-            return nextPoint;
+            finalPointItem = nextPointItem;
         }
         else {
-            this.Debug(`next point = ${closestPoint.ToString()}`);
-            return closestPoint;
+            finalPointItem = closestPointItem;
         }
+
+        this.Debug(`next point = ${finalPointItem.Point.ToString()}`);
+
+        if (!finalPointItem.IsPointUpdated) {
+            let leastMobileUnit = this.getLeastMobileUnit();
+
+            if (leastMobileUnit) {
+                let updatedPoint = MaraMap.GetUnitReachableCell(leastMobileUnit, finalPointItem.Point);
+                
+                finalPointItem.Point = updatedPoint;
+                finalPointItem.IsPointUpdated = true;
+                
+                this.Debug(`updated next point = ${finalPointItem.Point.ToString()}`);
+            }
+        }
+
+        return finalPointItem.Point;
     }
 
     SetState(newState: MaraSquadState): void {
@@ -193,7 +226,7 @@ export class MaraControllableSquad extends MaraSquad {
         return `${this.id}`;
     }
 
-    public Debug(message: string): void {
+    Debug(message: string): void {
         let squadName = this.ToString();
         this.controller.DebugSquad(`[Squad ${squadName}]: ${message}`);
     }
@@ -213,5 +246,22 @@ export class MaraControllableSquad extends MaraSquad {
 
     protected onUnitsAdded(): void {
         this.recalcMinSpread();
+    }
+
+    private getLeastMobileUnit(): MaraUnitCacheItem | null {
+        let leastBitCount = Infinity;
+        let result: MaraUnitCacheItem | null = null;
+
+        for (let unit of this.Units) {
+            let moveType = MaraUtils.GetConfigIdMoveType(unit.UnitCfgId);
+            let bitCount = MaraUtils.CountRaisedBits(moveType);
+
+            if (bitCount < leastBitCount) {
+                result = unit;
+                leastBitCount = bitCount;
+            }
+        }
+
+        return result;
     }
 }

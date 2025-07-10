@@ -90,7 +90,7 @@ export class MaraMap {
     private static readonly UNWALKABLE_TO_WALKABLE_COST = 1;
     private static readonly UNWALKABLE_TO_UNWALKABLE_COST = 2;
 
-    private static readonly REACHABLE_CELL_SEARCH_RADIUS = 5;
+    private static readonly REACHABLE_CELL_SEARCH_RADIUS = 3;
     
     private static tileTypeCache: TileTypeCache = new TileTypeCache();
     
@@ -358,36 +358,29 @@ export class MaraMap {
         return [];
     }
 
-    static UpdatePathForUnit(unit: MaraUnitCacheItem, path: Array<MaraPoint>): Array<MaraPoint> {
-        let updatedPath = new Array<MaraPoint>();
-
+    static GetUnitReachableCell(unit: MaraUnitCacheItem, cell: MaraPoint): MaraPoint {
         let unitMovementType = MaraUtils.GetConfigIdMoveType(unit.UnitCfgId);
 
-        for (let cell of path) {
-            let cellKey = `${unitMovementType}${cell.ToString()}`;
-            
-            let reachableCell = MaraMap.cellsCache.get(cellKey);
-            
-            if (!reachableCell) {
-                let closestCell = MaraUtils.FindClosestCell(
-                    cell, 
-                    MaraMap.REACHABLE_CELL_SEARCH_RADIUS,
-                    (cell) => MaraUtils.IsCellReachable(cell, unit)
-                );
-
-                if (closestCell) {
-                    MaraMap.cellsCache.set(cellKey, closestCell);
-                    reachableCell = closestCell;
-                }
-                else {
-                    reachableCell = cell;
-                }
-            }
-
-            updatedPath.push(reachableCell);
-        }
+        let cellKey = `${unitMovementType}${cell.ToString()}`;
+        let reachableCell = MaraMap.cellsCache.get(cellKey);
         
-        return updatedPath;
+        if (!reachableCell) {
+            let closestCell = MaraUtils.FindClosestCell(
+                cell, 
+                MaraMap.REACHABLE_CELL_SEARCH_RADIUS,
+                (cell) => MaraUtils.IsCellReachable(cell, unit)
+            );
+
+            if (closestCell) {
+                MaraMap.cellsCache.set(cellKey, closestCell);
+                reachableCell = closestCell;
+            }
+            else {
+                reachableCell = cell;
+            }
+        }
+
+        return reachableCell;
     }
 
     static IsWalkableCell(cell: MaraPoint): boolean {

@@ -83,7 +83,7 @@ export class TacticalAttackState extends FsmState {
                 }
 
                 if (squad.IsIdle() && squad.CombativityIndex >= 1) {
-                    this.tacticalController.SendSquadToAttack(squad, this.attackPath);
+                    squad.Attack(this.attackPath);
                 }
             }
         }
