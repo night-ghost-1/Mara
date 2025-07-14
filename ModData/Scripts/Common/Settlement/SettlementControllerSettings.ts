@@ -41,7 +41,7 @@ class TimeoutsSettings {
     public StrategyReInitMax: number = 60 * 60 * 50;
 
     public SettlementEnhanceMinCooldown: number = 2 * 60 * 50;
-    public SettlementEnhanceMaxCooldown: number = 3 * 60 * 50;
+    public SettlementEnhanceMaxCooldown: number = 6 * 60 * 50;
     
     public UnfinishedConstructionThreshold: number = 2 * 60 * 50;
 
