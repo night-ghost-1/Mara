@@ -51,7 +51,7 @@ class ResourceRequest {
 
 export class MiningSubcontroller extends MaraTaskableSubcontroller {
     readonly RESOURCE_THRESHOLD = 1000;
-    readonly PEOPLE_THRESHOLD = 10;
+    readonly PEOPLE_THRESHOLD = 20;
     readonly DEBUG_RESOURCE_CLUSTER_SEARCH = false;
     
     public Sawmills: Array<SawmillData> = [];
