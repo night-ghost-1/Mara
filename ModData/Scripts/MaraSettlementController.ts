@@ -91,6 +91,16 @@ class ReservedUnitsData {
     }
 }
 
+class TempDefenceLocationData {
+    Rect: MaraRect;
+    TimeoutTick: number | null;
+
+    constructor(rect: MaraRect) {
+        this.Rect = rect;
+        this.TimeoutTick = null;
+    }
+}
+
 export class MaraSettlementController {
     public TickOffset: number = 0;
     
@@ -112,6 +122,7 @@ export class MaraSettlementController {
     private currentUnitComposition: UnitComposition | null = null;
     private currentDevelopedUnitComposition: UnitComposition | null = null;
     private settlementLocation: SettlementClusterLocation | null = null;
+    private tempDefenceLocations: Array<TempDefenceLocationData> = [];
 
     constructor (
         settlement: Settlement, 
@@ -156,7 +167,8 @@ export class MaraSettlementController {
         this.currentDevelopedUnitComposition = null;
 
         if (tickNumber % 50 == 0) {
-            this.cleanupExpands();
+            this.housekeepExpands();
+            this.housekeepTempDefenceLocations(tickNumber);
         }
 
         if (tickNumber % 10 == 0) {
@@ -240,7 +252,45 @@ export class MaraSettlementController {
         }
     }
 
-    private cleanupExpands(): void {
+    OnUnitAttacked(unit: MaraUnitCacheItem): void {
+        if (
+            !MaraUtils.IsHarvesterConfigId(unit.UnitCfgId) || 
+            this.ReservedUnitsData.IsUnitReserved(unit)
+        ) {
+            return;
+        }
+
+        let locationFound = false;
+
+        for (let location of this.GetDefenceLocations()) {
+            if (MaraRect.IsRectsIntersect(location, unit.UnitRect)) {
+                locationFound = true;
+                break;
+            }
+        }
+
+        if (!locationFound) {
+            let defenceLocation = MaraRect.CreateFromPoint(unit.UnitRect.Center, this.Settings.UnitSearch.TemporaryDefenceLocationRadius);
+            this.tempDefenceLocations.push(new TempDefenceLocationData(defenceLocation));
+        }
+    }
+
+    GetDefenceLocations(): Array<MaraRect> {
+        let result = this.tempDefenceLocations.map((l) => l.Rect);
+        
+        let settlementLocation = this.GetSettlementLocation();
+
+        if (settlementLocation) {
+            result.push(settlementLocation.BoundingRect);
+        }
+
+        let expands = this.Expands.map((e) => MaraRect.CreateFromPoint(e, this.Settings.UnitSearch.ExpandEnemySearchRadius));
+        result.push(...expands);
+
+        return result;
+    }
+
+    private housekeepExpands(): void {
         this.Expands = this.Expands.filter(
             (value) => {
                 let expandBuildings = MaraUtils.GetSettlementUnitsAroundPoint(
@@ -253,6 +303,22 @@ export class MaraSettlementController {
                 return expandBuildings.length > 0;
             }
         )
+    }
+
+    private housekeepTempDefenceLocations(tickNumber: number): void {
+        let filteredLocations = new Array<TempDefenceLocationData>();
+        
+        for (let location of this.tempDefenceLocations) {
+            if (location.TimeoutTick == null) {
+                location.TimeoutTick = tickNumber + this.Settings.Timeouts.TempDefenceLocationDuration;
+                filteredLocations.push(location);
+            }
+            else if (location.TimeoutTick > tickNumber) {
+                filteredLocations.push(location);
+            }
+        }
+
+        this.tempDefenceLocations = filteredLocations;
     }
 
     private recalcSettlementLocation(): void {

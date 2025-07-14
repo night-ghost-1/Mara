@@ -13,6 +13,7 @@ export class MaraSettlementControllerSettings {
 class UnitSearchSettings {
     public BuildingSearchRadius: number = 5;
     public ExpandEnemySearchRadius: number = 12;
+    public TemporaryDefenceLocationRadius: number = 5;
 }
 
 class TimeoutsSettings {
@@ -36,15 +37,17 @@ class TimeoutsSettings {
 
     public DefaultTaskReattemptMaxCooldown: number = 20 * 50;
 
-    public StrategyReInitMin = 30 * 60 * 50;
-    public StrategyReInitMax = 60 * 60 * 50;
+    public StrategyReInitMin: number = 30 * 60 * 50;
+    public StrategyReInitMax: number = 60 * 60 * 50;
 
-    public SettlementEnhanceMinCooldown = 2 * 60 * 50;
-    public SettlementEnhanceMaxCooldown = 3 * 60 * 50;
+    public SettlementEnhanceMinCooldown: number = 2 * 60 * 50;
+    public SettlementEnhanceMaxCooldown: number = 3 * 60 * 50;
     
     public UnfinishedConstructionThreshold: number = 2 * 60 * 50;
 
     public ResourceRequestDuration: number = 2 * 60 * 50;
+
+    public TempDefenceLocationDuration: number = 1.5 * 60 * 50;
 }
 
 class Priorities {

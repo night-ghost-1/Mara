@@ -1,6 +1,5 @@
 
 import { FsmState } from "../../Common/FiniteStateMachine/FsmState";
-import { MaraPoint } from "../../Common/MaraPoint";
 import { MaraRect } from "../../Common/MaraRect";
 import { MaraUtils } from "../../MaraUtils";
 import { MaraSquad } from "../../Subcontrollers/Squads/MaraSquad";
@@ -60,21 +59,6 @@ export class TacticalDefendState extends FsmState {
         }
     }
 
-    private registerHostileSquadsAroundPoint(point: MaraPoint, radius: number): Array<MaraSquad> {
-        let attackers = this.tacticalController.SettlementController.StrategyController.GetEnemiesAroundPoint(point, radius);
-        
-        return MaraUtils.GetSettlementsSquadsFromUnits(
-            attackers, 
-            this.tacticalController.SettlementController.StrategyController.EnemySettlements,
-            (unit) => {
-                return MaraUtils.ChebyshevDistance(
-                    unit.UnitCell,
-                    point
-                ) <= radius
-            }
-        );
-    }
-
     private registerHostileSquadsInArea(rect: MaraRect): Array<MaraSquad> {
         let attackers = this.tacticalController.SettlementController.StrategyController.GetEnemiesInArea(rect);
         
@@ -93,21 +77,14 @@ export class TacticalDefendState extends FsmState {
             return;
         }
 
-        let attackingSquads = this.registerHostileSquadsInArea(
-            settlementLocation.BoundingRect
-        );
-        
-        this.hostileAttackingSquads.push(...attackingSquads);
+        let defenceLocations = this.tacticalController.SettlementController.GetDefenceLocations();
 
-        for (let expandPoint of this.tacticalController.SettlementController.Expands) {
-            let expandAttackers = this.registerHostileSquadsAroundPoint(
-                expandPoint, 
-                this.tacticalController.SettlementController.Settings.UnitSearch.ExpandEnemySearchRadius
+        for (let location of defenceLocations) {
+            let attackingSquads = this.registerHostileSquadsInArea(
+                location
             );
 
-            if (expandAttackers.length > 0) {
-                this.hostileAttackingSquads.push(...expandAttackers);
-            }
+            this.hostileAttackingSquads.push(...attackingSquads);
         }
     }
 }

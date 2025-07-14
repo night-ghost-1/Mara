@@ -380,25 +380,10 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
     }
 
     IsUnderAttack(): boolean {
-        let settlementLocation = this.settlementController.GetSettlementLocation();
+        let defenceLocations = this.settlementController.GetDefenceLocations();
 
-        if (!settlementLocation) {
-            return false;
-        }
-
-        if (!this.isSafeLocation(settlementLocation.BoundingRect))  {
-            return true;
-        }
-
-        for (let expandPoint of this.settlementController.Expands) {
-            if (
-                !this.isSafeLocation(
-                    MaraRect.CreateFromPoint(
-                        expandPoint, 
-                        this.settlementController.Settings.UnitSearch.ExpandEnemySearchRadius
-                    )
-                )
-            ) {
+        for (let location of defenceLocations) {
+            if (!this.isSafeLocation(location)) {
                 return true;
             }
         }

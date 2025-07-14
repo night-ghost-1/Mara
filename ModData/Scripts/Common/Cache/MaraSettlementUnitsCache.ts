@@ -3,8 +3,7 @@ import { MaraUnitBushItem } from "./MaraUnitBushItem";
 import { MaraUnitCacheItem } from "./MaraUnitCacheItem";
 import RBush from "../RBush/rbush.js"
 import { MaraSettlementController } from "../../MaraSettlementController";
-import { Mara } from "../../Mara";
-import { Settlement, Unit, UnitDummyStateChangedEventArgs, UnitHealthChangedEventArgs, UnitLifeStateChangedEventArgs, UnitMovedToCellEventArgs } from "library/game-logic/horde-types";
+import { Settlement, TakeDamageEventArgs, Unit, UnitDummyStateChangedEventArgs, UnitHealthChangedEventArgs, UnitLifeStateChangedEventArgs, UnitMovedToCellEventArgs } from "library/game-logic/horde-types";
 
 type UnitsListChangedEventArgs = HordeClassLibrary.World.Settlements.Modules.SettlementUnits.UnitsListChangedEventArgs;
 
@@ -56,6 +55,14 @@ export class MaraSettlementUnitsCache {
             (sender: any, args: UnitDummyStateChangedEventArgs | null) => {
                 if (args) {
                     this.unitDummyStateChangedProcessor(args);
+                }
+            }
+        );
+
+        settlement.Units.UnitTakeDamage.connect(
+            (sender: any, args: TakeDamageEventArgs | null) => {
+                if (args) {
+                    this.unitDamagedProcessor(args);
                 }
             }
         );
@@ -175,8 +182,18 @@ export class MaraSettlementUnitsCache {
         let cacheItem = this.cacheItemIndex.get(unit.Id);
         
         if (cacheItem) {
-            Mara.Debug(`unit ${cacheItem.Unit.ToString()} dummy state changed to ${cacheItem.Unit.IsDummy}`);
             cacheItem.UnitIsDummy = unit.IsDummy;
+        }
+    }
+
+    private unitDamagedProcessor(args: TakeDamageEventArgs): void {
+        let unit = args.TriggeredUnit;
+        let cacheItem = this.cacheItemIndex.get(unit.Id);
+
+        if (cacheItem) {
+            if (this.SettlementController) {
+                this.SettlementController.OnUnitAttacked(cacheItem);
+            }
         }
     }
 }
