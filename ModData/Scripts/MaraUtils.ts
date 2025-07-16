@@ -1440,7 +1440,7 @@ export class MaraUtils {
         spawnGeometry(ActiveScena, geometryBuffer, createPoint(0, 0), ticksToLive);
     }
 
-    static DrawPath(path: Array<MaraPoint>, color: HordeColor): void {
+    static DrawPath(path: Array<MaraPoint>, color?: HordeColor): void {
         for (let i = 0; i < path.length - 1; i ++) {
             MaraUtils.DrawLineOnScena(path[i], path[i + 1], color);
         }

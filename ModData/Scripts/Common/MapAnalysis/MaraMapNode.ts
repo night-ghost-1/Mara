@@ -35,6 +35,10 @@ export class MaraMapNode {
     }
 
     IsWalkable(): boolean {
-        return this.Type == MaraMapNodeType.Gate || this.Type == MaraMapNodeType.Walkable;
+        return (
+            this.Type == MaraMapNodeType.Gate || 
+            this.Type == MaraMapNodeType.Walkable || 
+            this.Type == MaraMapNodeType.Bridge
+        );
     }
 }

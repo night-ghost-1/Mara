@@ -79,26 +79,26 @@ export class MaraMap {
     public static ProcessedResourceCells: Set<string> = new Set<string>();
     
     public static readonly WALKABLE_REGION_SIZE = 10;
-    public static readonly UNWALKABLE_REGION_SIZE = 4;
+    public static readonly UNWALKABLE_REGION_SIZE = 5;
     public static readonly GATE_THRESHOLD = 10;
     public static readonly RESOURCE_CLUSTER_SIZE = 8;
     public static readonly RESOURCE_CLUSTER_MAX_MINERAL_CELLS = 9;
     private static readonly MAX_PATH_COUNT = 10;
 
     private static readonly WALKABLE_TO_WALKABLE_COST = 1;
-    private static readonly WALKABLE_TO_UNWALKABLE_COST = 2;
+    private static readonly WALKABLE_TO_UNWALKABLE_COST = 4; // was 3
     private static readonly UNWALKABLE_TO_WALKABLE_COST = 1;
-    private static readonly UNWALKABLE_TO_UNWALKABLE_COST = 2;
+    private static readonly UNWALKABLE_TO_UNWALKABLE_COST = 5;
 
     private static readonly REACHABLE_CELL_SEARCH_RADIUS = 3;
     
     private static tileTypeCache: TileTypeCache = new TileTypeCache();
     
-    private static DEBUG_MAP = false;
+    private static readonly DEBUG_MAP = false;
     private static mapNodes: Array<MaraMapNode> = [];
     private static nodeIndex: MaraRegionIndex;
 
-    private static DEBUG_RESOURCES = false;
+    private static readonly DEBUG_RESOURCES = false;
     private static resourceMapMonitor: ChangesObtainer;
     private static resourceData: Array<Array<ResourceTile>> = [];
     private static clusterData: ClusterData = new ClusterData();
@@ -223,7 +223,7 @@ export class MaraMap {
                 return [];
             }
         
-            if (path.every((v) => v.Weigth > WEIGTH_INCREMENT)) {
+            if (path.every((v) => !v.IsWalkable() || v.Weigth > WEIGTH_INCREMENT)) {
                 break;
             }
             else {
@@ -246,7 +246,7 @@ export class MaraMap {
         return tileType;
     }
 
-    static AddNode(nodeCells: Array<MaraPoint>, nodeType: MaraMapNodeType): void {
+    static AddNode(nodeCells: Array<MaraPoint>, nodeType: MaraMapNodeType): MaraMapNode {
         let overlappedNodes: Array<MaraMapNode> = [];
 
         for (let cell of nodeCells) {
@@ -286,6 +286,8 @@ export class MaraMap {
         if (MaraMap.DEBUG_MAP) {
             MaraMap.drawMap();
         }
+
+        return newNode;
     }
 
     static GetResourceClustersAroundPoint(point: MaraPoint, radius: number): Array<MaraResourceCluster> {
@@ -413,7 +415,7 @@ export class MaraMap {
                 n.Weigth = Infinity;
             }
         });
-    }    
+    }
 
     private static validateBridge(bridgeSections: Array<MaraRect>, sourceNode: MaraMapNode, destNode: MaraMapNode): boolean {
         if (bridgeSections.length == 0) {
@@ -631,6 +633,19 @@ export class MaraMap {
         MaraMap.linkMap(MaraMap.mapNodes, MaraMap.nodeIndex, false);
         
         MaraMap.cleanupMapNodes();
+        
+        for (let node of MaraMap.mapNodes) {
+            if (!node.IsWalkable() || node.Type == MaraMapNodeType.Bridge) {
+                continue;
+            }
+
+            for (let link of node.Links) {
+                if (link.Node.Type == MaraMapNodeType.Unwalkable) {
+                    link.Weigth += MaraMap.WALKABLE_TO_UNWALKABLE_COST;
+                }
+            }
+        }
+        
         MaraMap.nodeIndex.Clear();
         
         for (let node of MaraMap.mapNodes) {
@@ -1027,19 +1042,33 @@ export class MaraMap {
 
             for (let i = 0; i < MaraMap.mapNodes.length; i ++) {
                 let node = MaraMap.mapNodes[i];
+                let walkableNeighbourCount = 0;
+                let firstWalkableNeightbour: MaraMapNode | null = null;
+
+                for (let link of node.Links) {
+                    if (link.Node.IsWalkable()) {
+                        walkableNeighbourCount ++;
+
+                        if (!firstWalkableNeightbour) {
+                            firstWalkableNeightbour = link.Node;
+                        }
+                    }
+                }
 
                 if (
-                    node.Links.length == 1 &&
+                    walkableNeighbourCount <= 1 &&
                     (
                         node.Type == MaraMapNodeType.Gate ||
                         node.Type == MaraMapNodeType.Walkable && node.Region.Cells.length < MaraMap.WALKABLE_REGION_SIZE / 4
                     )
                 ) {
-                    let link = node.Links[0];
+                    if (firstWalkableNeightbour) {
+                        firstWalkableNeightbour.Region.AddCells(node.Region.Cells);
 
-                    if (link.Node.Type == MaraMapNodeType.Walkable) {
-                        link.Node.Region.AddCells(node.Region.Cells);
-                        link.Node.Links = link.Node.Links.filter((v) => v.Node != node);
+                        for (let link of node.Links) {
+                            let neighbour = link.Node;
+                            neighbour.Links = neighbour.Links.filter((v) => v.Node != node);
+                        }
                         
                         atLeastOneNodeChanged = true;
                     }
@@ -1058,24 +1087,28 @@ export class MaraMap {
     }
 
     private static linkNodes(node: MaraMapNode, neighbourNode: MaraMapNode): void {
-        if (!node.Links.find((v) => v.Node == neighbourNode)) {
-            let link = new MaraMapNodeLink(neighbourNode, MaraMap.getTransitionCost(node, neighbourNode));
+        if (!MaraMap.findLink(node, neighbourNode)) {
+            let link = new MaraMapNodeLink(neighbourNode, MaraMap.getTransitionWeigth(node, neighbourNode));
             node.Links.push(link);
         }
     
-        if (!neighbourNode.Links.find((v) => v.Node == node)) {
-            let link = new MaraMapNodeLink(node, MaraMap.getTransitionCost(neighbourNode, node));
+        if (!MaraMap.findLink(neighbourNode, node)) {
+            let link = new MaraMapNodeLink(node, MaraMap.getTransitionWeigth(neighbourNode, node));
             neighbourNode.Links.push(link);
         }
     }
 
-    private static getTransitionCost(from: MaraMapNode, to: MaraMapNode): number {
+    private static findLink(from: MaraMapNode, to: MaraMapNode): MaraMapNodeLink | undefined {
+        return from.Links.find((v) => v.Node == to);
+    }
+
+    private static getTransitionWeigth(from: MaraMapNode, to: MaraMapNode): number {
         if (from.IsWalkable()) {
             if (to.IsWalkable()) {
                 return MaraMap.WALKABLE_TO_WALKABLE_COST;
             }
             else {
-                return MaraMap.WALKABLE_TO_UNWALKABLE_COST;
+                return 0; // will be updated later in linkMap()
             }
         }
         else {
@@ -1119,7 +1152,6 @@ export class MaraMap {
     }
 
     private static drawMap(): void {
-        let nodeIndex = 0;
         let processedPairs: [MaraRegion, MaraRegion][] = [];
         
         for (let node of MaraMap.mapNodes) {
@@ -1138,6 +1170,7 @@ export class MaraMap {
             let color: HordeColor;
 
             switch (node.Type) {
+                case MaraMapNodeType.Bridge:
                 case MaraMapNodeType.Gate:
                     color = createHordeColor(255, 0, 0, 255);
                     break;
@@ -1150,10 +1183,8 @@ export class MaraMap {
             }
 
             for (let cell of node.Region.Cells) {
-                MaraUtils.TextOnMap(`${nodeIndex}`, cell, color);
+                MaraUtils.TextOnMap(`${node.Id}`, cell, color);
             }
-
-            nodeIndex ++;
         }
     }
 
@@ -1326,7 +1357,7 @@ export class MaraMap {
         settlement.Units.UnitsListChanged.connect(
             (sender: any, UnitsListChangedEventArgs: UnitsListChangedEventArgs | null) => {
                 if (UnitsListChangedEventArgs) {
-                    MaraMap.unitListChangedProcessor(sender, UnitsListChangedEventArgs);
+                    MaraMap.unitListChangedProcessor(UnitsListChangedEventArgs);
                 }
             }
         );
@@ -1338,57 +1369,88 @@ export class MaraMap {
         }
     }
 
-    private static unitListChangedProcessor(sender: any, UnitsListChangedEventArgs: UnitsListChangedEventArgs): void {
+    private static unitListChangedProcessor(UnitsListChangedEventArgs: UnitsListChangedEventArgs): void {
         let unit = UnitsListChangedEventArgs.Unit;
 
-        if (MaraUtils.IsWalkableConfigId(unit.Cfg.Uid)) {
-            if (UnitsListChangedEventArgs.IsAdded) {
-                let handler = unit.EventsMind.BuildingComplete.connect(
-                    (sender: any, args: UnitBuildingCompleteEventArgs | null) => {
-                        if (args) {
-                            MaraMap.walkableBuildingBuiltProcessor(sender, args);
-                        }
-                    }
-                );
+        if (!MaraUtils.IsWalkableConfigId(unit.Cfg.Uid)) {
+            return;
+        }
 
-                MaraMap.unitBuildHandlers.set(unit.Id, handler);
+        if (UnitsListChangedEventArgs.IsAdded) {
+            let handler = unit.EventsMind.BuildingComplete.connect(
+                (sender: any, args: UnitBuildingCompleteEventArgs | null) => {
+                    if (args) {
+                        MaraMap.walkableBuildingBuiltProcessor(args);
+                    }
+                }
+            );
+
+            MaraMap.unitBuildHandlers.set(unit.Id, handler);
+        }
+        else {
+            let unitCells = MaraMap.getUnitCells(unit);
+            let prevNode = MaraMap.nodeIndex.Get(unitCells[0]) as MaraMapNode;
+
+            if (prevNode?.Type != MaraMapNodeType.Bridge) {
+                return;
             }
-            else {
-                let unitId = unit.Id;
-                let handler = MaraMap.unitBuildHandlers.get(unitId);
+            
+            let unitId = unit.Id;
+            let handler = MaraMap.unitBuildHandlers.get(unitId);
 
-                if (handler) {
-                    handler.disconnect();
-                    MaraMap.unitBuildHandlers.delete(unitId);
+            if (handler) {
+                handler.disconnect();
+                MaraMap.unitBuildHandlers.delete(unitId);
+            }
+
+            let walkableCellsCount = 0;
+
+            for (let cell of unitCells) {
+                if (MaraMap.IsWalkableCell(cell)) {
+                    walkableCellsCount ++;
                 }
+            }
 
-                let unitCells = MaraMap.getUnitCells(unit);
-                let walkableCellsCount = 0;
+            let wasCompletedBridge = false;
+            let bridge: Array<MaraMapNode> = [];
 
-                for (let cell of unitCells) {
-                    if (MaraMap.IsWalkableCell(cell)) {
-                        walkableCellsCount ++;
-                    }
-                }
+            if (unitCells.length > 0) {
+                bridge = MaraMap.getFullBridge(prevNode);
 
-                let nodeType = MaraMapNodeType.Unwalkable;
+                wasCompletedBridge = MaraMap.isCompletedBridge(bridge);
+                bridge = bridge.filter((n) => n != prevNode);
+            }
 
-                if (walkableCellsCount > unitCells.length / 2) {
-                    nodeType = MaraMapNodeType.Walkable;
-                }
+            let nodeType = MaraMapNodeType.Unwalkable;
 
-                MaraMap.AddNode(unitCells, nodeType);
+            if (walkableCellsCount > unitCells.length / 2) {
+                nodeType = MaraMapNodeType.Walkable;
+            }
+
+            let newNode = MaraMap.AddNode(unitCells, nodeType);
+
+            let isCompletedBridge = MaraMap.isCompletedBridge(bridge);
+
+            if (wasCompletedBridge && !isCompletedBridge) {
+                bridge.push(newNode);
+                MaraMap.changeBridgeNeighboursWeigth(bridge, -100);
             }
         }
     }
 
-    private static walkableBuildingBuiltProcessor(sender: any, args: UnitBuildingCompleteEventArgs): void {
+    private static walkableBuildingBuiltProcessor(args: UnitBuildingCompleteEventArgs): void {
         MaraMap.processWalkableUnitCompletion(args.TriggeredUnit);
     }
 
     private static processWalkableUnitCompletion(unit: Unit): void {
         let unitCells = this.getUnitCells(unit);
-        MaraMap.AddNode(unitCells, MaraMapNodeType.Gate);
+        let bridgeNode = MaraMap.AddNode(unitCells, MaraMapNodeType.Bridge);
+
+        let bridge = MaraMap.getFullBridge(bridgeNode);
+
+        if (MaraMap.isCompletedBridge(bridge)) {
+            MaraMap.changeBridgeNeighboursWeigth(bridge, 100);
+        }
     }
 
     private static getUnitCells(unit: Unit): Array<MaraPoint> {
@@ -1406,5 +1468,91 @@ export class MaraMap {
         }
 
         return unitCells;
+    }
+
+    private static getFullBridge(startNode: MaraMapNode): Array<MaraMapNode> {
+        let processedNodes: any = {};
+        let nextNodes: Array<MaraMapNode> = [startNode];
+        let result: Array<MaraMapNode> = [];
+
+        while (nextNodes.length > 0) {
+            let currentNodes = [...nextNodes];
+            nextNodes = [];
+
+            for (let node of currentNodes) {
+                if (processedNodes[node.Id]) {
+                    continue;
+                }
+
+                processedNodes[node.Id] = true;
+                result.push(node);
+
+                for (let link of node.Links) {
+                    let neighbour = link.Node;
+
+                    if (processedNodes[neighbour.Id]) {
+                        continue;
+                    }
+
+                    if (neighbour.Type == MaraMapNodeType.Bridge) {
+                        nextNodes.push(neighbour);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static isCompletedBridge(bridge: Array<MaraMapNode>): boolean {
+        let startWalkableNode: MaraMapNode | null = null;
+
+        for (let node of bridge) {
+            for (let link of node.Links) {
+                if (link.Node.Type != MaraMapNodeType.Walkable) {
+                    continue;
+                }
+
+                if (startWalkableNode == null) {
+                    startWalkableNode = link.Node;
+                }
+                else if (link.Node != startWalkableNode) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static changeBridgeNeighboursWeigth(bridge: Array<MaraMapNode>, weigthDelta: number): void {
+        let processedNeighbours: any = {};
+        
+        for (let node of bridge) {
+            for (let link of node.Links) {
+                let unwalkableNeighbour = link.Node;
+
+                if (bridge.find((n) => n == unwalkableNeighbour)) {
+                    continue;
+                }
+                
+                if (
+                    unwalkableNeighbour.IsWalkable() ||
+                    processedNeighbours[unwalkableNeighbour.Id] != undefined
+                ) {
+                    continue;
+                }
+
+                processedNeighbours[unwalkableNeighbour.Id] = undefined;
+                
+                for (let neighbourLink of unwalkableNeighbour.Links) {
+                    let backlink = MaraMap.findLink(neighbourLink.Node, unwalkableNeighbour);
+
+                    if (backlink) {
+                        backlink.Weigth = Math.max(backlink.Weigth + weigthDelta, 0);
+                    }
+                }
+            }
+        }
     }
 }
