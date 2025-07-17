@@ -77,12 +77,13 @@ export class MaraResourceClusterBushItem {
 export class MaraMap {
     public static ResourceClusters: Array<MaraResourceCluster>;
     public static ProcessedResourceCells: Set<string> = new Set<string>();
+    
     public static readonly RESOURCE_CLUSTER_MAX_MINERAL_CELLS = 9;
+    public static readonly RESOURCE_CLUSTER_SIZE = 8;
     
     private static readonly WALKABLE_REGION_SIZE = 10;
     private static readonly UNWALKABLE_REGION_SIZE = 5;
     private static readonly GATE_THRESHOLD = 10;
-    private static readonly RESOURCE_CLUSTER_SIZE = 8;
     private static readonly MAX_PATH_COUNT = 10;
 
     private static readonly WALKABLE_TO_WALKABLE_COST = 1;
