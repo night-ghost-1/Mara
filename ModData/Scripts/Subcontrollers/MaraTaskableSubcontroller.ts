@@ -16,8 +16,6 @@ export abstract class MaraTaskableSubcontroller extends MaraSubcontroller {
     Tick(tickNumber: number): void {
         this.doRoutines(tickNumber);
 
-        this.allTasks = this.allTasks.filter((t) => !t.IsCompleted);
-        
         if (this.activeTask) {
             if (this.activeTask.IsCompleted) {
                 this.Debug(`Task ${this.activeTask.ToString()} completed with result ${this.activeTask.IsSuccess}`);

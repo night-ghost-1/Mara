@@ -12,6 +12,10 @@ export class ProduceSettlementEnhancementsState extends ProductionTaskState {
     }
 
     protected onEntry(): boolean {
+        if (!this.isAtLeastOneConfigIdProduceable(this.cfgIds)) {
+            return false;
+        }
+        
         return true;
     }
 

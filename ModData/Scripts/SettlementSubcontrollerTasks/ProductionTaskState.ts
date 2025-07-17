@@ -19,6 +19,7 @@ export abstract class ProductionTaskState extends SubcontrollerTaskState {
     protected abstract onTargetCompositionReached(): void;
     protected abstract onProductionTimeout(): void;
     protected requestMiningOnInsufficientResources = true;
+    protected continueIfMiningFailed = false;
 
     private timeoutTick: number | null = null;
     
@@ -56,7 +57,8 @@ export abstract class ProductionTaskState extends SubcontrollerTaskState {
                     requestResult.Task!,
                     this,
                     this.task,
-                    this.settlementController
+                    this.settlementController,
+                    this.continueIfMiningFailed
                 );
                 
                 this.task.SetState(awaitState);
@@ -229,6 +231,16 @@ export abstract class ProductionTaskState extends SubcontrollerTaskState {
             this.task.Debug(`Destination is reachable, bridge is not needed`);
             return null;
         }
+    }
+
+    protected isAtLeastOneConfigIdProduceable(configIds: Array<string>): boolean {
+        for (let configId of configIds) {
+            if (this.settlementController.ProductionController.IsCfgIdProduceable(configId)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     private makeProductionQueueRequest(

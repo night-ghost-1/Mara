@@ -25,29 +25,33 @@ export class ExpandBuildState extends ProductionTaskState {
     }
 
     protected onEntry(): boolean {
+        if (!this.canMineAtLeastOneResourceType()) {
+            this.task.Debug(`Unable to build expand: no mining facilities available`);
+            return false;
+        }
+        
         let center = this.calculateExpandCenter();
         
         if (!center) {
+            this.task.Debug(`Unable to build expand: no settlement left`);
             return false;
         }
-        else {
-            this.expandCenter = center;
-            
-            let settlementLocation = this.settlementController.GetSettlementLocation();
 
-            if (!settlementLocation) {
-                return true;
-            }
+        this.expandCenter = center;    
+        let settlementLocation = this.settlementController.GetSettlementLocation();
 
-            let path = MaraMap.GetShortestPath(settlementLocation.Center, center);
-
-            if (!path && !settlementLocation.Center.EqualsTo(center)) {
-                this.task.Debug(`Unable to build expand, location is not reachable`);
-                return false;
-            }
-            
+        if (!settlementLocation) {
             return true;
         }
+
+        let path = MaraMap.GetShortestPath(settlementLocation.Center, center);
+
+        if (!path && !settlementLocation.Center.EqualsTo(center)) {
+            this.task.Debug(`Unable to build expand, location is not reachable`);
+            return false;
+        }
+        
+        return true;
     }
 
     protected onExit(): void {
@@ -328,5 +332,93 @@ export class ExpandBuildState extends ProductionTaskState {
         );
 
         return result;
+    }
+
+    private canOrderMining(): boolean {
+        let mineConfigs = MaraUtils.GetAllMineConfigIds(this.settlementController.Settlement);
+        
+        if (!this.isAtLeastOneConfigIdProduceable(mineConfigs)) {
+            return false;
+        }
+
+        let harvesterConfigs = MaraUtils.GetAllHarvesterConfigIds(this.settlementController.Settlement);
+        
+        if (!this.isAtLeastOneConfigIdProduceable(harvesterConfigs)) {
+            return false;
+        }
+
+        let metalStockConfigs = MaraUtils.GetAllMetalStockConfigIds(this.settlementController.Settlement);
+        
+        if (!this.isAtLeastOneConfigIdProduceable(metalStockConfigs)) {
+            let allUnits = MaraUtils.GetAllSettlementUnits(this.settlementController.Settlement);
+
+            let metalStocks = allUnits.filter((u) => MaraUtils.IsMetalStockConfigId(u.UnitCfgId));
+
+            if (metalStocks.length == 0) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    private canOrderWoodcutting(): boolean {
+        let sawmillConfigs = MaraUtils.GetAllSawmillConfigIds(this.settlementController.Settlement);
+        
+        if (!this.isAtLeastOneConfigIdProduceable(sawmillConfigs)) {
+            return false;
+        }
+
+        let harvesterConfigs = MaraUtils.GetAllHarvesterConfigIds(this.settlementController.Settlement);
+        
+        if (!this.isAtLeastOneConfigIdProduceable(harvesterConfigs)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private canOrderHousing(): boolean {
+        let housingConfigs = MaraUtils.GetAllHousingConfigIds(this.settlementController.Settlement);
+        
+        if (!this.isAtLeastOneConfigIdProduceable(housingConfigs)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private canMineAtLeastOneResourceType(): boolean {
+        if (
+            this.targetExpand.ResourceType.findIndex(
+                (value) => {return value == MaraResourceType.Gold || value == MaraResourceType.Metal}
+            ) >= 0
+            &&
+            this.canOrderMining()
+        ) {
+            return true;
+        }
+
+        if (
+            this.targetExpand.ResourceType.findIndex(
+                (value) => {return value == MaraResourceType.Wood}
+            ) >= 0
+            &&
+            this.canOrderWoodcutting()
+        ) {
+            return true;
+        }
+
+        if (
+            this.targetExpand.ResourceType.findIndex(
+                (value) => {return value == MaraResourceType.People}
+            ) >= 0
+            &&
+            this.canOrderHousing()
+        ) {
+            return true;
+        }
+
+        return false;
     }
 }
