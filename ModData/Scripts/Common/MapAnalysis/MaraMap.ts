@@ -77,18 +77,19 @@ export class MaraResourceClusterBushItem {
 export class MaraMap {
     public static ResourceClusters: Array<MaraResourceCluster>;
     public static ProcessedResourceCells: Set<string> = new Set<string>();
-    
-    public static readonly WALKABLE_REGION_SIZE = 10;
-    public static readonly UNWALKABLE_REGION_SIZE = 5;
-    public static readonly GATE_THRESHOLD = 10;
-    public static readonly RESOURCE_CLUSTER_SIZE = 8;
     public static readonly RESOURCE_CLUSTER_MAX_MINERAL_CELLS = 9;
+    
+    private static readonly WALKABLE_REGION_SIZE = 10;
+    private static readonly UNWALKABLE_REGION_SIZE = 5;
+    private static readonly GATE_THRESHOLD = 10;
+    private static readonly RESOURCE_CLUSTER_SIZE = 8;
     private static readonly MAX_PATH_COUNT = 10;
 
     private static readonly WALKABLE_TO_WALKABLE_COST = 1;
-    private static readonly WALKABLE_TO_UNWALKABLE_COST = 4; // was 3
+    private static readonly WALKABLE_TO_UNWALKABLE_COST = 4;
     private static readonly UNWALKABLE_TO_WALKABLE_COST = 1;
     private static readonly UNWALKABLE_TO_UNWALKABLE_COST = 5;
+    private static readonly VISITED_REGION_PENALTY = 100;
 
     private static readonly REACHABLE_CELL_SEARCH_RADIUS = 3;
     
@@ -213,7 +214,6 @@ export class MaraMap {
         MaraMap.initPathfinding(unwalkableNodeTypesToInclude);
         
         let paths: Array<MaraPath> = [];
-        const WEIGTH_INCREMENT = 100;
 
         while (paths.length < MaraMap.MAX_PATH_COUNT) {
             //let path = MaraMap.dijkstraPath(fromNode, toNode, MaraMap.mapNodes);
@@ -223,11 +223,11 @@ export class MaraMap {
                 return [];
             }
         
-            if (path.every((v) => !v.IsWalkable() || v.Weigth > WEIGTH_INCREMENT)) {
+            if (path.every((v) => !v.IsWalkable() || v.Weigth > MaraMap.VISITED_REGION_PENALTY)) {
                 break;
             }
             else {
-                path.forEach((v) => v.Weigth += WEIGTH_INCREMENT);
+                path.forEach((v) => v.Weigth += MaraMap.VISITED_REGION_PENALTY);
                 paths.push(new MaraPath(path));
             }
         }
@@ -1433,7 +1433,7 @@ export class MaraMap {
 
             if (wasCompletedBridge && !isCompletedBridge) {
                 bridge.push(newNode);
-                MaraMap.changeBridgeNeighboursWeigth(bridge, -100);
+                MaraMap.changeBridgeNeighboursWeigth(bridge, -MaraMap.VISITED_REGION_PENALTY);
             }
         }
     }
@@ -1449,7 +1449,7 @@ export class MaraMap {
         let bridge = MaraMap.getFullBridge(bridgeNode);
 
         if (MaraMap.isCompletedBridge(bridge)) {
-            MaraMap.changeBridgeNeighboursWeigth(bridge, 100);
+            MaraMap.changeBridgeNeighboursWeigth(bridge, MaraMap.VISITED_REGION_PENALTY);
         }
     }
 
