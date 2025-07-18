@@ -1527,30 +1527,37 @@ export class MaraMap {
     }
 
     private static changeBridgeNeighboursWeigth(bridge: Array<MaraMapNode>, weigthDelta: number): void {
+        const DEPTH = 2;
+        let nextLevel = bridge;
         let processedNeighbours: any = {};
         
-        for (let node of bridge) {
-            for (let link of node.Links) {
-                let unwalkableNeighbour = link.Node;
+        for (let i = 0; i < DEPTH; i ++) {
+            let currentLevel = nextLevel;
+            nextLevel = [];
 
-                if (bridge.find((n) => n == unwalkableNeighbour)) {
-                    continue;
-                }
-                
-                if (
-                    unwalkableNeighbour.IsWalkable() ||
-                    processedNeighbours[unwalkableNeighbour.Id] != undefined
-                ) {
-                    continue;
-                }
+            for (let node of currentLevel) {
+                processedNeighbours[node.Id] = node;
+            }
 
-                processedNeighbours[unwalkableNeighbour.Id] = undefined;
-                
-                for (let neighbourLink of unwalkableNeighbour.Links) {
-                    let backlink = MaraMap.findLink(neighbourLink.Node, unwalkableNeighbour);
+            for (let node of currentLevel) {
+                for (let link of node.Links) {
+                    let neighbour = link.Node;
 
-                    if (backlink) {
-                        backlink.Weigth = Math.max(backlink.Weigth + weigthDelta, 0);
+                    if (
+                        neighbour.IsWalkable() ||
+                        processedNeighbours[neighbour.Id] != undefined
+                    ) {
+                        continue;
+                    }
+
+                    nextLevel.push(neighbour);
+                    
+                    for (let neighbourLink of neighbour.Links) {
+                        let backlink = MaraMap.findLink(neighbourLink.Node, neighbour);
+
+                        if (backlink) {
+                            backlink.Weigth = Math.max(backlink.Weigth + weigthDelta, 0);
+                        }
                     }
                 }
             }
