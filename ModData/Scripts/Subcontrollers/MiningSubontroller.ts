@@ -118,7 +118,23 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
 
         for (let row = Math.max(rect.TopLeft.Y - mineHeigth + 1, 0); row <= rect.BottomRight.Y; row ++) {
             for (let col = Math.max(rect.TopLeft.X - mineWidth + 1, 0); col <= rect.BottomRight.X; col ++) {
-                if (unitCanBePlacedByRealMap(mineConfig, col, row)) {
+                let canPlaceMine = unitCanBePlacedByRealMap(mineConfig, col, row);
+                
+                let isEmergeCellWalkable = false;
+
+                if (!mineConfig.BuildingConfig.EmergePoint) {
+                    isEmergeCellWalkable = true;
+                }
+                else {
+                    let emergeCell = new MaraPoint(
+                        col + mineConfig.BuildingConfig.EmergePoint.X,
+                        row + mineConfig.BuildingConfig.EmergePoint.Y
+                    );
+
+                    isEmergeCellWalkable = MaraMap.IsWalkableCell(emergeCell);
+                }
+                
+                if (canPlaceMine && isEmergeCellWalkable) {
                     let position = new MaraPoint(col, row);
                     
                     let positionResources = this.GetRectResources(
