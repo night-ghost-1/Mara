@@ -66,6 +66,14 @@ export class ProductionSubcontroller extends MaraSubcontroller {
             list.push(...itemsCfgIds);
         }
 
+        list.push(...this.masterMindRequestedCfgIds);
+        
+        return list;
+    }
+
+    private get masterMindRequestedCfgIds(): Array<string> {
+        let list: Array<string> = [];
+
         let masterMind = this.settlementController.MasterMind;
         let requests = enumerate(masterMind.Requests);
         let request;
@@ -194,7 +202,6 @@ export class ProductionSubcontroller extends MaraSubcontroller {
         }
         
         let producers = this.productionIndex!.get(configId);
-        
         let producersCount = 0;
 
         if (producers) {
@@ -211,15 +218,18 @@ export class ProductionSubcontroller extends MaraSubcontroller {
                 orderedCfgIdsCount ++;
             }
         }
+
+        let result: Array<MaraProductionRequest> = [];
         
-        if (orderedCfgIdsCount >= producersCount) {
-            return [];
+        if (orderedCfgIdsCount < producersCount) {
+            let request = this.requestCfgIdProduction(configId, priority);
+            result.push(request);
         }
         
-        let request = this.requestCfgIdProduction(configId, priority);
         let chain = this.requestAbsentProductionChainItemsProduction(configId, priority);
+        result.push(...chain);
 
-        return [request, ...chain];
+        return result;
     }
 
     GetProduceableCfgIds(): Array<string> {
@@ -312,6 +322,12 @@ export class ProductionSubcontroller extends MaraSubcontroller {
         let requiredConfigs = MaraUtils.GetCfgIdProductionChain(configId, this.settlementController.Settlement);
         
         let existingUnits = MaraUtils.GetAllSettlementUnits(this.settlementController.Settlement);
+        existingUnits = existingUnits.filter(
+            (u) => 
+                !this.settlementController.ReservedUnitsData.IsUnitReserved(u) ||
+                this.executingRequestItems.find((i) => i.ParentRequest.Executor == u) != null
+        );
+
         let existingCfgIds = new Set<string>();
 
         for (let unit of existingUnits) {
@@ -319,9 +335,28 @@ export class ProductionSubcontroller extends MaraSubcontroller {
         }
 
         let result: Array<MaraProductionRequest> = [];
+        let queuedRequestsArr = this.queuedRequests.toArray() as MaraProductionRequest[];
         
         for (let cfg of requiredConfigs) {
-            if (!existingCfgIds.has(cfg.Uid) && !this.productionCfgIdList.find((value) => {return value == cfg.Uid})) {
+            let isProductionRequestQueued = false;
+
+            for (let request of queuedRequestsArr) {
+                if (
+                    request.Items.find((i) => i.ConfigId == cfg.Uid) &&
+                    request.Priority == priority
+                ) {
+                    isProductionRequestQueued = true;
+                    break;
+                }
+            }
+
+            let isProductionRequestExecuting = this.executingRequestItems.find((v) => v.ConfigId == cfg.Uid) != null;
+            
+            if (
+                !existingCfgIds.has(cfg.Uid) && 
+                !isProductionRequestQueued &&
+                !isProductionRequestExecuting
+            ) {
                 let request = this.requestCfgIdProduction(cfg.Uid, priority);
                 result.push(request);
             }
