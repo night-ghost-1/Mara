@@ -105,7 +105,7 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
         let mineralCells = [...resourceCluster.GoldCells, ...resourceCluster.MetalCells];
         let rect = MaraUtils.GetBoundingRect(mineralCells);
 
-        let optimalPosition: MaraPoint | null = null;
+        let optimalPositions: Array<MaraPoint> = [];
         let optimalPositionResources: MaraResources | null = null;
 
         let mineHeigth = MaraUtils.GetConfigIdHeight(mineConfigId);
@@ -148,38 +148,44 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
                     if (optimalPositionResources) {
                         if (targetResourceType == MaraResourceType.Gold) {
                             if (positionResources.Gold > optimalPositionResources.Gold) {
-                                optimalPosition = position;
+                                optimalPositions = [position];
                                 optimalPositionResources = positionResources;
                             }
-                            else if (
-                                positionResources.Gold == optimalPositionResources.Gold &&
-                                positionResources.Metal > optimalPositionResources.Metal
-                            ) {
-                                optimalPosition = position;
+                            else if (positionResources.Gold == optimalPositionResources.Gold) {
+                                if (positionResources.Metal > optimalPositionResources.Metal) {
+                                    optimalPositions = [position];
+                                }
+                                else if (positionResources.Metal == optimalPositionResources.Metal) {
+                                    optimalPositions.push(position);
+                                }
+
                                 optimalPositionResources = positionResources;
                             }
                         }
                         else {
                             if (positionResources.Metal > optimalPositionResources.Metal) {
-                                optimalPosition = position;
+                                optimalPositions = [position];
                                 optimalPositionResources = positionResources;
                             }
-                            else if (
-                                positionResources.Metal == optimalPositionResources.Metal &&
-                                positionResources.Gold > optimalPositionResources.Gold
-                            ) {
-                                optimalPosition = position;
+                            else if (positionResources.Metal == optimalPositionResources.Metal) {
+                                if (positionResources.Gold > optimalPositionResources.Gold) {
+                                    optimalPositions = [position];
+                                }
+                                else if (positionResources.Gold == optimalPositionResources.Gold) {
+                                    optimalPositions.push(position);
+                                }
+
                                 optimalPositionResources = positionResources;
                             }
                         }
                     }
                     else {
                         if (targetResourceType == MaraResourceType.Gold && positionResources.Gold > 0) {
-                            optimalPosition = position;
+                            optimalPositions = [position];
                             optimalPositionResources = positionResources;
                         }
                         else if (targetResourceType == MaraResourceType.Metal && positionResources.Metal > 0) {
-                            optimalPosition = position;
+                            optimalPositions = [position];
                             optimalPositionResources = positionResources;
                         }
                     }
@@ -187,7 +193,7 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
             }
         }
 
-        return optimalPosition;
+        return MaraUtils.RandomSelect(this.settlementController.MasterMind, optimalPositions);
     }
 
     public GetOptimalHarvesterCount(): number {
