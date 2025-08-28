@@ -17,11 +17,12 @@ import { MaraResourceClusterSelection } from "../Common/MaraResourceClusterSelec
 import { MaraTaskableSubcontroller } from "./MaraTaskableSubcontroller";
 import { SettlementSubcontrollerTask } from "../SettlementSubcontrollerTasks/SettlementSubcontrollerTask";
 import { AttackTask } from "../SettlementSubcontrollerTasks/StrategySubcontroller/AttackTask/AttackTask";
-import { DefendTask } from "../SettlementSubcontrollerTasks/StrategySubcontroller/DefendTask/DefendTask";
+import { MainBaseDefendTask } from "../SettlementSubcontrollerTasks/StrategySubcontroller/MainBaseDefendTask/MainBaseDefendTask";
 import { SubcontrollerRequestResult } from "../Common/SubcontrollerRequestResult";
 import { LandmarkCaptureTask } from "../SettlementSubcontrollerTasks/StrategySubcontroller/LandmarkCaptureTask/LandmarkCaptureTask";
 import { MaraMapNodeType } from "../Common/MapAnalysis/MaraMapNodeType";
 import { Player, Settlement } from "library/game-logic/horde-types";
+import { ExpandDefendTask } from "../SettlementSubcontrollerTasks/StrategySubcontroller/ExpandDefendTask/ExpandDefendTask";
 
 class PathSelectItem implements NonUniformRandomSelectItem {
     // @ts-ignore
@@ -56,8 +57,7 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
         );
     }
     
-    public EnemySettlements: Array<Settlement> = []; //but actually Settlement
-    public CheckForUnderAttack = true;
+    public EnemySettlements: Array<Settlement> = [];
 
     private globalStrategy: SettlementGlobalStrategy = new SettlementGlobalStrategy();
     private globalStrategyReInitTick: number;
@@ -379,9 +379,7 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
         }
     }
 
-    IsUnderAttack(): boolean {
-        let defenceLocations = this.settlementController.GetDefenceLocations();
-
+    IsUnderAttack(defenceLocations: Array<MaraRect>): boolean {
         for (let location of defenceLocations) {
             if (!this.isSafeLocation(location)) {
                 return true;
@@ -559,10 +557,23 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
             this.updateEnemiesList();
             this.reinitGlobalStrategy(tickNumber);
 
-            if (this.CheckForUnderAttack && this.IsUnderAttack()) {
-                let defendTask = new DefendTask(this.settlementController, this);
-                this.AddTask(defendTask);
-                this.CheckForUnderAttack = false;
+            let isBaseDefendTaskPresent = this.AllTasks.find((t) => t.constructor.name == MainBaseDefendTask.name) != undefined;
+            let isExpandDefendTaskPresent = this.AllTasks.find((t) => t.constructor.name == ExpandDefendTask.name) != undefined;
+
+            let settlementLocation = this.settlementController.GetSettlementLocation();
+
+            if (
+                !isBaseDefendTaskPresent && 
+                settlementLocation && 
+                this.IsUnderAttack([settlementLocation.BoundingRect])
+            ) {
+               this.AddTask(new MainBaseDefendTask(this.settlementController, this));
+            }
+            else if (
+                !isExpandDefendTaskPresent && 
+                this.IsUnderAttack(this.settlementController.GetDefenceLocations())
+            ) {
+                this.AddTask(new ExpandDefendTask(this.settlementController, this));
             }
         }
     }

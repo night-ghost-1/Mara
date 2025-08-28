@@ -12,6 +12,16 @@ export abstract class MaraTaskableSubcontroller extends MaraSubcontroller {
 
     private activeTask: SettlementSubcontrollerTask | null = null;
     private allTasks: Array<SettlementSubcontrollerTask> = [];
+
+    public get AllTasks(): Array<SettlementSubcontrollerTask> {
+        let result = [...this.allTasks];
+
+        if (this.activeTask) {
+            result.push(this.activeTask);
+        }
+
+        return result;
+    }
     
     Tick(tickNumber: number): void {
         this.doRoutines(tickNumber);

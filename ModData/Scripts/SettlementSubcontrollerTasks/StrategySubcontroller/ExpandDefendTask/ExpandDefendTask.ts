@@ -1,9 +1,9 @@
 import { MaraLogger } from "../../../Common/MaraLogger";
 import { MaraSettlementController } from "../../../MaraSettlementController";
 import { SettlementSubcontrollerTask } from "../../SettlementSubcontrollerTask";
-import { DefendingState } from "./DefendingState";
+import { ExpandDefendState } from "./ExpandDefendState";
 
-export class DefendTask extends SettlementSubcontrollerTask {
+export class ExpandDefendTask extends SettlementSubcontrollerTask {
     public get ExpectedTimeout(): number {
         return Infinity;
     }
@@ -12,9 +12,9 @@ export class DefendTask extends SettlementSubcontrollerTask {
         settlementController: MaraSettlementController,
         logger: MaraLogger
     ) {
-        super(settlementController.Settings.Priorities.SettlementDefence, settlementController, logger);
+        super(settlementController.Settings.Priorities.ExpandDefence, settlementController, logger);
         
-        let state = new DefendingState(this, this.SettlementController);
+        let state = new ExpandDefendState(this, this.SettlementController);
         this.SetState(state);
     }
 }

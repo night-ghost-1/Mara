@@ -3,10 +3,13 @@ import { MaraSettlementController } from "../../../MaraSettlementController";
 import { ConstantProductionState } from "../../ConstantProductionState";
 import { SettlementSubcontrollerTask } from "../../SettlementSubcontrollerTask";
 
-export class DefendingState extends ConstantProductionState {
+export class MainBaseDefendingState extends ConstantProductionState {
     private reinforcementsCfgIds: Array<string> = [];
     
-    constructor(task: SettlementSubcontrollerTask, settlementController: MaraSettlementController) {
+    constructor(
+        task: SettlementSubcontrollerTask, 
+        settlementController: MaraSettlementController
+    ) {
         super(task, settlementController);
     }
     
@@ -17,15 +20,20 @@ export class DefendingState extends ConstantProductionState {
 
     OnExit(): void {
         this.settlementController.TacticalController.Idle();
-        this.settlementController.StrategyController.CheckForUnderAttack = true;
         this.finalizeProductionRequests();
     }
 
     Tick(tickNumber: number): void {
         if (tickNumber % 50 == 0) {
             this.cleanupProductionRequests();
+            let settlementLocation = this.task.SettlementController.GetSettlementLocation();
 
-            if (!this.settlementController.StrategyController.IsUnderAttack()) {
+            if (!settlementLocation) {
+                this.task.Debug(`Nothing left to defend`);
+                this.task.Complete(true);
+                return;
+            }
+            else if (!this.settlementController.StrategyController.IsUnderAttack([settlementLocation.BoundingRect])) {
                 this.task.Debug(`Attack countered`);
                 this.task.Complete(true);
                 return;
