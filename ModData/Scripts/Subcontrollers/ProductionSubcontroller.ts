@@ -446,7 +446,7 @@ export class ProductionSubcontroller extends MaraSubcontroller {
     }
 
     private getUnitsToRepair(repairZones: Array<SettlementClusterLocation>): Array<MaraUnitCacheItem> {
-        let result: Array<MaraUnitCacheItem> = [];
+        let unitsToRepair = new Map<number, MaraUnitCacheItem>();
 
         for (let zone of repairZones) {
             let zoneReparableUnits = MaraUtils.GetSettlementUnitsInArea(
@@ -463,10 +463,12 @@ export class ProductionSubcontroller extends MaraSubcontroller {
 
             for (let unit of zoneReparableUnits) {
                 if (unit.UnitHealth < MaraUtils.GetConfigIdMaxHealth(unit.UnitCfgId)) {
-                    result.push(unit);
+                    unitsToRepair.set(unit.UnitId, unit);
                 }
             }
         }
+
+        let result = Array.from(unitsToRepair.values());
 
         result = result.filter(
             (u) => !this.repairRequests.find(
@@ -486,20 +488,24 @@ export class ProductionSubcontroller extends MaraSubcontroller {
                 !request.Target.UnitIsAlive ||
                 request.Executor.Unit.OrdersMind.OrdersCount == 0
             ) {
+                this.Debug("finalizing request due to unit idle")
                 this.finalizeRepairRequest(request);
             }
             else {
-                let isRequestFinalized = false;
+                let isUnitInRepairZone = false;
                 
                 for (let zone of repairZones) {
-                    if (!MaraRect.IsRectsIntersect(zone.BoundingRect, request.Target.UnitRect)) {
-                        this.finalizeRepairRequest(request);
-                        isRequestFinalized = true;
+                    if (MaraRect.IsRectsIntersect(zone.BoundingRect, request.Target.UnitRect)) {
+                        isUnitInRepairZone = true;
                         break;
                     }
                 }
                 
-                if (!isRequestFinalized) {
+                if (!isUnitInRepairZone) {
+                    this.Debug("finalizing request due to unit idle")
+                    this.finalizeRepairRequest(request);
+                }
+                else {
                     filteredRequests.push(request);
                 }
             }
