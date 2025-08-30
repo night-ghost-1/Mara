@@ -1118,7 +1118,8 @@ export class MaraUtils {
 
     private static configStrength(unitConfig: UnitConfig): number {
         if (MaraUtils.isArmedConfig(unitConfig)) {
-            return unitConfig.MaxHealth * Math.sqrt(unitConfig.Shield + 1);
+            // return unitConfig.MaxHealth * Math.sqrt(unitConfig.Shield + 1);
+            return unitConfig.MaxHealth * Math.pow(unitConfig.Shield + 1, 1 / 3);
         }
         else {
             return 0;
