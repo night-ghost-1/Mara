@@ -488,7 +488,6 @@ export class ProductionSubcontroller extends MaraSubcontroller {
                 !request.Target.UnitIsAlive ||
                 request.Executor.Unit.OrdersMind.OrdersCount == 0
             ) {
-                this.Debug("finalizing request due to unit idle")
                 this.finalizeRepairRequest(request);
             }
             else {
@@ -502,7 +501,6 @@ export class ProductionSubcontroller extends MaraSubcontroller {
                 }
                 
                 if (!isUnitInRepairZone) {
-                    this.Debug("finalizing request due to unit idle")
                     this.finalizeRepairRequest(request);
                 }
                 else {
