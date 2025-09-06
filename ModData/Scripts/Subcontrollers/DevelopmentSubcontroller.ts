@@ -63,7 +63,7 @@ export class DevelopmentSubcontroller extends MaraTaskableSubcontroller {
         let economyComposition = this.settlementController.GetCurrentEconomyComposition();
         let produceableCfgIds = this.settlementController.ProductionController.GetProduceableCfgIds();
 
-        let shortestUnavailableChain = this.getShortestUnavailableChain(economyComposition, produceableCfgIds);
+        let shortestUnavailableChain = this.getBestUnavailableChain(economyComposition, produceableCfgIds);
 
         let selectedCfgIds: Array<string> | null = null;
     
@@ -112,7 +112,7 @@ export class DevelopmentSubcontroller extends MaraTaskableSubcontroller {
         }
     }
 
-    private getShortestUnavailableChain(economyComposition: UnitComposition, produceableCfgIds: Array<string>): Array<string> | null {
+    private getBestUnavailableChain(economyComposition: UnitComposition, produceableCfgIds: Array<string>): Array<string> | null {
         let globalStrategy = this.settlementController.StrategyController.GlobalStrategy;
         let allRequiredCfgIdItems = [...globalStrategy.DefensiveBuildingsCfgIds, ...globalStrategy.OffensiveCfgIds];
         
@@ -120,7 +120,19 @@ export class DevelopmentSubcontroller extends MaraTaskableSubcontroller {
             (value) => {
                 return produceableCfgIds.findIndex((item) => item == value.CfgId) < 0
             }
-        )
+        );
+
+        let produceableMainCombatCfgIds = produceableCfgIds.filter(
+            (item) => this.isMainCombatConfigId(item)
+        );
+
+        if (produceableMainCombatCfgIds.length == 0) {
+            let unavailableMainCombatItems = unavailableCfgIdItems.filter((item) => this.isMainCombatConfigId(item.CfgId));
+
+            if (unavailableMainCombatItems.length > 0) {
+                unavailableCfgIdItems = unavailableMainCombatItems;
+            }
+        }
 
         let produceableUnavailableChains: Array<Array<string>> = [];
         
@@ -319,5 +331,13 @@ export class DevelopmentSubcontroller extends MaraTaskableSubcontroller {
         }
 
         return null;
+    }
+
+    private isMainCombatConfigId(configId: string): boolean {
+        return (
+            MaraUtils.IsCombatConfigId(configId) && 
+            !MaraUtils.IsShortSightedConfigId(configId) &&
+            !MaraUtils.IsRangedAccurateConfigId(configId)
+        )
     }
 }
