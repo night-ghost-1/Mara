@@ -185,7 +185,7 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
             }
         }
 
-        if (combatUnitCfgIds.length == 0) {
+        if (combatUnitCfgIds.length == 0 && this.globalStrategy.LowestTechOffensiveCfgId) {
             combatUnitCfgIds.push(this.globalStrategy.LowestTechOffensiveCfgId);
         }
         
