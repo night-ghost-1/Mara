@@ -34,7 +34,7 @@ export { ResourceType }
 type UnitsMap = HordeClassLibrary.World.ScenaComponents.Intrinsics.UnitsMap;
 type LandscapeMap = HordeClassLibrary.World.ScenaComponents.Scena.ScenaLandscape;
 type ResourceMap = HordeClassLibrary.World.ScenaComponents.Scena.ScenaResourcesMap;
-type SettlementPopulationCensusModel = HordeClassLibrary.World.Settlements.Models.SettlementPopulationCensusModel;
+type SettlementPopulationCensusData = HordeClassLibrary.World.Settlements.Data.SettlementPopulationCensusData;
 type HordeRandomizer = HordeResurrection.Basic.Primitives.HordeRandomizer;
 
 class DotnetHolder {
@@ -159,8 +159,8 @@ export class MaraUtils {
         return allowedCfgItems;
     }
 
-    static GetSettlementCensusModel(settlement: Settlement): SettlementPopulationCensusModel {
-        return ScriptUtils.GetValue(settlement.Census, "Model");
+    static GetSettlementCensusData(settlement: Settlement): SettlementPopulationCensusData {
+        return ScriptUtils.GetValue(settlement.Census, "Data");
     }
     //#endregion
     

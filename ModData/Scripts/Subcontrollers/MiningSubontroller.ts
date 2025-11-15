@@ -478,8 +478,8 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
             }
         }
 
-        let model = MaraUtils.GetPropertyValue(settlement.Census, "Model");
-        let taxFactor = model.TaxFactor;
+        let data = MaraUtils.GetPropertyValue(settlement.Census, "Data");
+        let taxFactor = data.TaxFactor;
 
         totalResources.Gold += taxFactor.Gold * totalResources.People;
         totalResources.Wood += taxFactor.Lumber * totalResources.People;
