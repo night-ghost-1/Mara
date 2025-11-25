@@ -161,7 +161,7 @@ export class Mara {
             return;
         }
 
-        if (!settlementData.Player.IsLocal) {
+        if (!settlementData.Player.IsLocal && !settlementData.Player.IsReplay) {
             Mara.Info(`Skipping player ${playerId}: player is not local`);
             return;
         }
