@@ -8,6 +8,76 @@ export class MaraSettlementControllerSettings {
     public ResourceMining: ResourceMiningSettings = new ResourceMiningSettings();
     public Combat: CombatSettings = new CombatSettings();
     public Priorities: Priorities = new Priorities();
+
+    public Difficulty;
+
+    constructor(
+        difficulty: string,
+
+        minAttackStrength: number,
+        attackStrengthToEnemyStrengthRatio: number,
+
+        maxUsedOffensiveCfgIdCount: number,
+        maxUsedDefensiveCfgIdCount: number,
+        maxSameCfgIdProducerCount: number,
+        settlementPointDefenceBatchCount: number,
+        gatePointDefenceBatchCount: number,
+        expandPointDefenceBatchCount: number,
+        
+        useSquadsEnrageMode: boolean,
+
+        minMinersPerMine: number,
+        woodcutterBatchSize: number,
+        minWoodcuttersPerSawmill: number,
+        maxWoodcuttersPerSawmill: number,
+        housingBatchSize: number,
+        
+        strategyActionSuccessMinCooldown: number,
+        strategyActionSuccessMaxCooldown: number,
+        strategyActionFailMinCooldown: number,
+        strategyActionFailMaxCooldown: number,
+        strategyActionUnavailMinCooldown: number,
+        strategyActionUnavailMaxCooldown: number,
+        settlementEnhanceMinCooldown: number,
+        settlementEnhanceMaxCooldown: number,
+
+        defendedGatesCount: number
+    ) {
+        this.Difficulty = difficulty;
+        
+        this.Timeouts.StrategyActionSuccessMinCooldown = strategyActionSuccessMinCooldown;
+        this.Timeouts.StrategyActionSuccessMaxCooldown = strategyActionSuccessMaxCooldown;
+
+        this.Timeouts.StrategyActionFailMinCooldown = strategyActionFailMinCooldown;
+        this.Timeouts.StrategyActionFailMaxCooldown = strategyActionFailMaxCooldown;
+
+        this.Timeouts.StrategyActionUnavailMinCooldown = strategyActionUnavailMinCooldown;
+        this.Timeouts.StrategyActionUnavailMaxCooldown = strategyActionUnavailMaxCooldown;
+
+        this.Timeouts.SettlementEnhanceMinCooldown = settlementEnhanceMinCooldown;
+        this.Timeouts.SettlementEnhanceMaxCooldown = settlementEnhanceMaxCooldown;
+
+        this.ControllerStates.DefendedGatesCount = defendedGatesCount;
+        this.ControllerStates.MaxSameCfgIdProducerCount = maxSameCfgIdProducerCount;
+
+        this.ControllerStates.MinAttackStrength = minAttackStrength;
+
+        this.ResourceMining.MinMinersPerMine = minMinersPerMine;
+        this.ResourceMining.WoodcutterBatchSize = woodcutterBatchSize;
+        this.ResourceMining.MinWoodcuttersPerSawmill = minWoodcuttersPerSawmill;
+        this.ResourceMining.MaxWoodcuttersPerSawmill = maxWoodcuttersPerSawmill;
+        this.ResourceMining.HousingBatchSize = housingBatchSize;
+
+        this.Combat.MaxUsedOffensiveCfgIdCount = maxUsedOffensiveCfgIdCount;
+        this.Combat.MaxUsedDefensiveCfgIdCount = maxUsedDefensiveCfgIdCount;
+        
+        this.Combat.AttackStrengthToEnemyStrengthRatio = attackStrengthToEnemyStrengthRatio;
+        this.Combat.SettlementPointDefenceBatchCount = settlementPointDefenceBatchCount;
+        this.Combat.GatePointDefenceBatchCount = gatePointDefenceBatchCount;
+        this.Combat.ExpandPointDefenceBatchCount = expandPointDefenceBatchCount;
+
+        this.Squads.UseEnrageMode = useSquadsEnrageMode;
+    }
 }
 
 class UnitSearchSettings {
@@ -32,8 +102,8 @@ class TimeoutsSettings {
     public StrategyActionFailMinCooldown = 10 * 50;
     public StrategyActionFailMaxCooldown = 20 * 50;
     
-    public StrategyActionUnavailMaxCooldown: number = 1 * 60 * 50;
     public StrategyActionUnavailMinCooldown: number = 0.5 * 60 * 50;
+    public StrategyActionUnavailMaxCooldown: number = 1 * 60 * 50;
 
     public DefaultTaskReattemptMaxCooldown: number = 20 * 50;
 
@@ -83,6 +153,7 @@ class SquadsSettings {
     public KiteThresholdPositionChangeDistance: number = 5;
     public GatherUpTimeout: number = 5 * 50;
 
+    public UseEnrageMode: boolean = true;
     public MinEnrageActivationTimeout: number = 10 * 50;
     public MaxEnrageActivationTimeout: number = 20 * 50;
     public MinEnrageCooldown: number = 10 * 50;
@@ -122,6 +193,10 @@ class ResourceMiningSettings {
 
 class CombatSettings {
     public PointDefenseBatchStrength: number = 100;
+    public SettlementPointDefenceBatchCount: number = 10;
+    public GatePointDefenceBatchCount: number = 1;
+    public ExpandPointDefenceBatchCount: number = 1;
+
     public MaxCompositionUnitCount: number = 20;
     public MaxUsedOffensiveCfgIdCount: number = 4;
     public MaxUsedDefensiveCfgIdCount: number = 1;

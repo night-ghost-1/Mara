@@ -1,6 +1,6 @@
 import { activePlugins } from "active-plugins";
 import HordePluginBase from "plugins/base-plugin";
-import { Mara } from "./Mara";
+import { Mara, MaraDifficultyName } from "./Mara";
 import { createResourcesAmount } from "library/common/primitives";
 import { isReplayMode } from "library/game-logic/game-tools";
 import { LogLevel } from "library/common/logging";
@@ -76,27 +76,39 @@ export class MaraPlugin extends HordePluginBase {
     }
 
     private mineResources(gameTickNum: number): void {
-        const RESOUCE_INCREASE_INTERVAL = 20 * 50; // 10 seconds for standard speed
+        const RESOUCE_INCREASE_INTERVAL = 20 * 50; // 20 seconds for standard speed
+        const RESOUCE_INCREASE_INTERVAL_FOR_BRUTAL = 6 * 60 * 50; // 6 minutes for standard speed
 
-        if (gameTickNum % RESOUCE_INCREASE_INTERVAL > 0) {
-            return;
+        if (gameTickNum % RESOUCE_INCREASE_INTERVAL == 0) {
+            let resourceIncrease = createResourcesAmount(10, 10, 10, 1);
+        
+            for (let player of Players) {
+                let realPlayer = player.GetRealPlayer();
+
+                if (realPlayer.IsBot) {
+                    let settlement = realPlayer.GetRealSettlement();
+                    
+                    if (settlement) {
+                        let settlementResources = settlement.Resources;
+                        settlementResources.AddResources(resourceIncrease);
+                    }
+                }
+            }
+
+            Mara.Debug("Mined resources for all Mara controllers: " + resourceIncrease.ToString());
         }
 
-        let resourceIncrease = createResourcesAmount(10, 10, 10, 1);
+        if (gameTickNum % RESOUCE_INCREASE_INTERVAL_FOR_BRUTAL == 0) {
+            let resourceIncrease = createResourcesAmount(2000, 2000, 2000, 20);
         
-        for (let player of Players) {
-            let realPlayer = player.GetRealPlayer();
-
-            if (realPlayer.IsBot) {
-                let settlement = realPlayer.GetRealSettlement();
-                
-                if (settlement) {
-                    let settlementResources = settlement.Resources;
+            for (let controller of Mara.Controllers) {
+                if (controller.Settings.Difficulty == MaraDifficultyName.Brutal) {
+                    let settlementResources = controller.Settlement.Resources;
                     settlementResources.AddResources(resourceIncrease);
                 }
             }
-        }
 
-        Mara.Debug("Mined resources for all Mara controllers: " + resourceIncrease.ToString());
+            Mara.Debug("Mined resources for brutal Mara controllers: " + resourceIncrease.ToString());
+        }
     }
 }

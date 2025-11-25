@@ -26,7 +26,10 @@ export class MaraSquadAttackState extends MaraSquadState {
     OnExit(): void {}
 
     Tick(tickNumber: number): void {
-        if (this.enrageSwitchTick < tickNumber) {
+        if (
+            this.squad.Controller.SquadsSettings.UseEnrageMode &&
+            this.enrageSwitchTick < tickNumber
+        ) {
             if (!this.isEnrageMode) {
                 this.enrageSwitchTick = MaraUtils.Random(
                     this.squad.Controller.SettlementController.MasterMind,

@@ -4,12 +4,12 @@
     {
       "Uid": "#Force_Barbarian",
       "Archetype": "#Force_Barbarian",
-      "DefaultCharacter": "#MindCharacter_MaraDefault"
+      "DefaultCharacter": "#MindCharacter_MaraHard"
     },
     {
       "Uid": "#Force_Slavyane",
       "Archetype": "#Force_Slavyane",
-      "DefaultCharacter": "#MindCharacter_MaraDefault"
+      "DefaultCharacter": "#MindCharacter_MaraHard"
     }
   ]
 }

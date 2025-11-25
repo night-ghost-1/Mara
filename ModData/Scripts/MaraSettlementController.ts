@@ -128,14 +128,15 @@ export class MaraSettlementController {
         settlement: Settlement, 
         settlementMM: MasterMind, 
         player: Player, 
-        tickOffset: number
+        tickOffset: number,
+        settings: MaraSettlementControllerSettings
     ) {
         this.TickOffset = tickOffset;
         
         this.Settlement = settlement;
         this.Player = player;
         this.MasterMind = settlementMM;
-        this.Settings = new MaraSettlementControllerSettings();
+        this.Settings = settings;
 
         if (!this.MasterMind.IsWorkMode) {
             this.Debug("Engaging MasterMind");

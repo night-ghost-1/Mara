@@ -293,7 +293,11 @@ export class DevelopmentSubcontroller extends MaraTaskableSubcontroller {
             for (let point of this.settlementController.Expands) {
                 let guardStrength = strategyController.GetPointGuardStrength(point);
 
-                if (guardStrength < this.settlementController.Settings.Combat.PointDefenseBatchStrength) {
+                if (
+                    guardStrength < 
+                        this.settlementController.Settings.Combat.ExpandPointDefenceBatchCount * 
+                        this.settlementController.Settings.Combat.PointDefenseBatchStrength
+                ) {
                     defenceBuildCandidates.push(point);
                 }
             }
@@ -303,7 +307,11 @@ export class DevelopmentSubcontroller extends MaraTaskableSubcontroller {
             if (settlementLocation) {
                 let guardStrength = strategyController.GetPointGuardStrength(settlementLocation.Center);
 
-                if (guardStrength < 10 * this.settlementController.Settings.Combat.PointDefenseBatchStrength) {
+                if (
+                    guardStrength < 
+                        this.settlementController.Settings.Combat.SettlementPointDefenceBatchCount * 
+                        this.settlementController.Settings.Combat.PointDefenseBatchStrength
+                ) {
                     defenceBuildCandidates.push(settlementLocation.Center);
                 }
             }
@@ -318,7 +326,11 @@ export class DevelopmentSubcontroller extends MaraTaskableSubcontroller {
                         this.settlementController.Settings.UnitSearch.ExpandEnemySearchRadius / 2
                     );
 
-                    if (guardStrength < this.settlementController.Settings.Combat.PointDefenseBatchStrength) {
+                    if (
+                        guardStrength < 
+                            this.settlementController.Settings.Combat.GatePointDefenceBatchCount * 
+                            this.settlementController.Settings.Combat.PointDefenseBatchStrength
+                    ) {
                         defenceBuildCandidates.push(gate);
                     }
                 }
