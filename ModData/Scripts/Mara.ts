@@ -42,15 +42,13 @@ class SettlementControllerSettingsCollection {
 
 export class Mara {
     private static profilers: MaraProfilersCollection = {};
+    private static controllerSettings: SettlementControllerSettingsCollection = {};
     
     static CanRun = true;
     static Logger: Logger;
     
-    private static controllerSettings: SettlementControllerSettingsCollection = {};
     private static controllers: Array<MaraSettlementController> = [];
     private static pathfinder: PathFinder;
-    private static needInit: boolean = false;
-    private static hasErrors: boolean = false;
     
     public static get Controllers(): Array<MaraSettlementController> {
         return Mara.controllers;
@@ -74,11 +72,7 @@ export class Mara {
     
     static Tick(tickNumber: number): void {
         try {
-            if (Mara.needInit) {
-                Mara.init();
-            }
-            
-            if (Mara.CanRun && !Mara.hasErrors) {
+            if (Mara.CanRun) {
                 if (tickNumber < 10) { // doing nothing for first 10 ticks since not all core objects may be properly inited
                     return;
                 }
@@ -116,8 +110,42 @@ export class Mara {
 
     static FirstRun(logger: Logger): void {
         Mara.Logger = logger;
-        Mara.hasErrors = false;
-        Mara.needInit = true;
+        
+        Mara.Info(`Engaging Mara...`);
+        Mara.Info(`Failed to load library './Empathy/heart', reason: not found. Proceeding without it.`);
+        Mara.Info(`Failed to load library './Empathy/soul', reason: not found. Proceeding without it.`);
+        Mara.Info(`Empathy subsystem is not responding`);
+
+        try {
+            Mara.CanRun = true;
+            Mara.controllers = [];
+
+            Mara.MakeSettlementControllerSettings();
+            MaraUnitCache.Init();
+            MaraUnitConfigCache.Init();
+            MaraMap.Init();
+
+            let tickOffset = 0;
+            let processedSettlements: Array<Settlement> = [];
+            let allPlayers = MaraUtils.GetAllPlayers();
+
+            for (let item of allPlayers) {
+                let player = Players[item.index];
+
+                if (player.IsBot) {
+                    Mara.AttachToPlayer(item.index, processedSettlements, tickOffset);
+                    tickOffset ++;
+                }
+            }
+        }
+        catch (ex) {
+            log.exception(ex);
+            broadcastMessage(`(Мара) Обнаружена ошибка. Мара остановлена.`, createHordeColor(255, 255, 0, 0));
+            Mara.CanRun = false;
+            return;
+        }
+
+        Mara.Info(`Mara successfully engaged. Have fun! ^^`);
     };
 
     static AttachToPlayer(playerId: number, processedSettlements: Array<Settlement>, tickOffset: number = 0): void {
@@ -277,62 +305,6 @@ export class Mara {
         );
 
         Mara.controllerSettings[MaraDifficultyName.Easy] = easySettings;
-    }
-
-    private static init(): void {
-        try {
-            let atLeastOneBotPresent = false;
-
-            for (let player of Players) {
-                let realPlayer = player.GetRealPlayer();
-
-                if (realPlayer.IsBot) {
-                    atLeastOneBotPresent = true;
-                    break;
-                }
-            }
-
-            if (!atLeastOneBotPresent) {
-                Mara.Info(`Unable to engage Mara: no bot players in game found`);
-                Mara.hasErrors = true; // not really an error, but I'm too lazy to add another flag for this
-                return;
-            }
-            
-            if (!Mara.CanRun) {
-                Mara.Info(`Unable to engage Mara: Mara is disabled by another plugin`);
-                return;
-            }
-            
-            Mara.Info(`Engaging Mara...`);
-            Mara.Info(`Failed to load library './Empathy/heart', reason: not found. Proceeding without it.`);
-            Mara.Info(`Failed to load library './Empathy/soul', reason: not found. Proceeding without it.`);
-            Mara.Info(`Empathy subsystem is not responding`);
-
-            Mara.controllers = [];
-
-            Mara.MakeSettlementControllerSettings();
-            MaraUnitCache.Init();
-            MaraUnitConfigCache.Init();
-            MaraMap.Init();
-
-            let tickOffset = 0;
-            let processedSettlements: Array<Settlement> = [];
-            let allPlayers = MaraUtils.GetAllPlayers();
-
-            for (let item of allPlayers) {
-                let player = Players[item.index];
-
-                if (player.IsBot) {
-                    Mara.AttachToPlayer(item.index, processedSettlements, tickOffset);
-                    tickOffset ++;
-                }
-            }
-
-            Mara.Info(`Mara successfully engaged. Have fun! ^^`);
-        }
-        finally {
-            Mara.needInit = false;
-        }
     }
 
     //#region logging helpers
