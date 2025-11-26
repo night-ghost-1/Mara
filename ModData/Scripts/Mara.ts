@@ -110,13 +110,36 @@ export class Mara {
 
     static FirstRun(logger: Logger): void {
         Mara.Logger = logger;
-        
-        Mara.Info(`Engaging Mara...`);
-        Mara.Info(`Failed to load library './Empathy/heart', reason: not found. Proceeding without it.`);
-        Mara.Info(`Failed to load library './Empathy/soul', reason: not found. Proceeding without it.`);
-        Mara.Info(`Empathy subsystem is not responding`);
+
+        if (!Mara.CanRun) {
+            Mara.Info(`Unable to engage Mara: Mara is disabled by another plugin.`);
+            return;
+        }
 
         try {
+            let atLeastOneBotPresent = false;
+
+            for (let player of Players) {
+                let realPlayer = player.GetRealPlayer();
+
+                if (realPlayer.IsBot) {
+                    atLeastOneBotPresent = true;
+                    break;
+                }
+            }
+
+            if (!atLeastOneBotPresent) {
+                Mara.Info(`Unable to engage Mara: no bot players found in game.`);
+                Mara.CanRun = false;
+                return;
+            }
+            
+            Mara.Info(`Engaging Mara...`);
+            Mara.Info(`Failed to load library './Empathy/heart', reason: not found. Proceeding without it.`);
+            Mara.Info(`Failed to load library './Empathy/soul', reason: not found. Proceeding without it.`);
+            Mara.Info(`Empathy subsystem is not responding`);
+
+        
             Mara.CanRun = true;
             Mara.controllers = [];
 
