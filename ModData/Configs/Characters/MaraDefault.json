@@ -6,32 +6,28 @@
       "Description": "Минимальная сложность",
       "DisplayName": "Нетяжкий",
       "DisplayNicknameMask": "[Mara] {0}",
-      "ForInternalUsingOnly": false,
-      "ProductionScript": []
+      "IsHidden": false
     },
     {
       "Uid": "#MindCharacter_MaraMedium",
       "Description": "Для бывалых",
       "DisplayName": "Искусный",
       "DisplayNicknameMask": "[Mara] {0}",
-      "ForInternalUsingOnly": false,
-      "ProductionScript": []
+      "IsHidden": false
     },
     {
       "Uid": "#MindCharacter_MaraHard",
       "Description": "Для опытных игроков",
       "DisplayName": "Гроза",
       "DisplayNicknameMask": "[Mara] {0}",
-      "ForInternalUsingOnly": false,
-      "ProductionScript": []
+      "IsHidden": false
     },
     {
       "Uid": "#MindCharacter_MaraBrutal",
       "Description": "Истинная мощь!",
       "DisplayName": "Погибель",
       "DisplayNicknameMask": "[Mara] {0}",
-      "ForInternalUsingOnly": false,
-      "ProductionScript": []
+      "IsHidden": false
     }
   ]
 }
