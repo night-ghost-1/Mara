@@ -59,9 +59,11 @@ export class MaraPlugin extends HordePluginBase {
             }
         }
 
-        if (!isReplayMode() || this.isReproducingMode) {
-            Mara.FirstRun(this.log);
+        if (isReplayMode() && !this.isReproducingMode) {
+            Mara.CanRun = false;
         }
+
+        Mara.FirstRun(this.log);
 
         if (isReplayMode() && this.isReproducingMode) {
             Mara.Info(`** Mara started in reproducing mode **`);
