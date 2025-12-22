@@ -44,6 +44,14 @@ export class Mara {
     private static profilers: MaraProfilersCollection = {};
     private static controllerSettings: SettlementControllerSettingsCollection = {};
     
+    /**
+     * Mara won't operate if this is set to **false**
+     * 
+     * WARNING: must NOT be explicitly set to **true** by any external
+     * plugin, script or mod since it is only intended to disable
+     * Mara operation and not to enable it and is also used internally
+     * for the same purpose.
+    */
     static CanRun = true;
     static Logger: Logger;
     
@@ -112,7 +120,7 @@ export class Mara {
         Mara.Logger = logger;
 
         if (!Mara.CanRun) {
-            Mara.Info(`Unable to engage Mara: Mara is disabled by another plugin.`);
+            Mara.Info(`Unable to engage Mara: Mara is disabled due to game mode or by another plugin.`);
             return;
         }
 
@@ -337,7 +345,7 @@ export class Mara {
                 if (Mara.Logger.logLevel != LogLevel.Debug) {
                     return;
                 }
-                
+
                 DebugLogger.WriteLine(`D ${message}`);
                 break;
             case MaraLogLevel.Info:
