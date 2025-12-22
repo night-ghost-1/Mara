@@ -1,4 +1,4 @@
-import { log, Logger } from "library/common/logging";
+import { log, Logger, LogLevel } from "library/common/logging";
 import { MaraSettlementController } from "./MaraSettlementController";
 import { MaraUtils } from "./MaraUtils";
 import { MaraMap } from "./Common/MapAnalysis/MaraMap";
@@ -334,6 +334,10 @@ export class Mara {
     static Log(level: MaraLogLevel, message: string) {
         switch (level) {
             case MaraLogLevel.Debug:
+                if (Mara.Logger.logLevel != LogLevel.Debug) {
+                    return;
+                }
+                
                 DebugLogger.WriteLine(`D ${message}`);
                 break;
             case MaraLogLevel.Info:
