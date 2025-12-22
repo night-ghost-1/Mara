@@ -5,6 +5,7 @@ import { createResourcesAmount } from "library/common/primitives";
 import { isReplayMode } from "library/game-logic/game-tools";
 import { LogLevel } from "library/common/logging";
 import { MaraUtils } from "./MaraUtils";
+import { Settlement } from "library/game-logic/horde-types";
 
 const DISPLAY_NAME = "Mara";
 
@@ -38,7 +39,7 @@ export class MaraPlugin extends HordePluginBase {
     }
 
     public onFirstRun() {
-        this.log.logLevel = LogLevel.Debug;
+        this.log.logLevel = LogLevel.Info;
         this.isReproducingMode = Battle.IsBotReproducingMode;
 
         let playerNames = MaraUtils.ShuffleArray(new Array(...MaraPlugin.playerNames));
@@ -95,20 +96,30 @@ export class MaraPlugin extends HordePluginBase {
                 }
             }
 
-            Mara.Debug("Mined resources for all Mara controllers: " + resourceIncrease.ToString());
+            Mara.Debug(`Mined resources for all Mara controllers: ${resourceIncrease}`);
         }
 
         if (gameTickNum % RESOUCE_INCREASE_INTERVAL_FOR_BRUTAL == 0) {
             let resourceIncrease = createResourcesAmount(2000, 2000, 2000, 20);
-        
-            for (let controller of Mara.Controllers) {
-                if (controller.Settings.Difficulty == MaraDifficultyName.Brutal) {
-                    let settlementResources = controller.Settlement.Resources;
+            let processedSettlements = new Array<Settlement>();
+            
+            for (let player of Players) {
+                if (player.MasterMind?.Character.Uid == MaraDifficultyName.Brutal) {
+                    let settlement = player.GetRealSettlement();
+
+                    if (processedSettlements.find((s) => s.Uid == settlement.Uid)) {
+                        continue;
+                    }
+                    else {
+                        processedSettlements.push(settlement);
+                    }
+
+                    let settlementResources = settlement.Resources;
                     settlementResources.AddResources(resourceIncrease);
+
+                    Mara.Debug(`Mined resources for brutal '${settlement.TownName}' ('${player.Nickname}'): ${resourceIncrease}`);
                 }
             }
-
-            Mara.Debug("Mined resources for brutal Mara controllers: " + resourceIncrease.ToString());
         }
     }
 }
