@@ -3,7 +3,7 @@
   "DisplayName": "Мара",
   "Description": "Добавляет в игру ботов",
   "Authors": "Ghost",
-  "BuiltIn": false,
+  "BuiltIn": true,
   "StandAlone": false,
   "Params": null,
   "GameVersion": "0.79pre",
