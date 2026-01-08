@@ -84,17 +84,23 @@ export class MaraPlugin extends HordePluginBase {
 
         if (gameTickNum % RESOUCE_INCREASE_INTERVAL == 0) {
             let resourceIncrease = createResourcesAmount(10, 10, 10, 1);
+            let processedSettlements = new Array<Settlement>();
         
             for (let player of Players) {
                 let realPlayer = player.GetRealPlayer();
 
                 if (realPlayer.IsBot) {
                     let settlement = realPlayer.GetRealSettlement();
-                    
-                    if (settlement) {
-                        let settlementResources = settlement.Resources;
-                        settlementResources.AddResources(resourceIncrease);
+
+                    if (processedSettlements.find((s) => s.Uid == settlement.Uid)) {
+                        continue;
                     }
+                    else {
+                        processedSettlements.push(settlement);
+                    }
+                    
+                    let settlementResources = settlement.Resources;
+                    settlementResources.AddResources(resourceIncrease);
                 }
             }
 
