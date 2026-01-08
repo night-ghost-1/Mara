@@ -162,6 +162,19 @@ export class Mara {
 
             for (let item of allPlayers) {
                 let player = Players[item.index];
+                let settlementData = MaraUtils.GetSettlementData(item.index);
+
+                if (!settlementData) {
+                    continue;
+                }
+
+                if (!player.IsBot) {
+                    processedSettlements.push(settlementData.Settlement);
+                }
+            }
+
+            for (let item of allPlayers) {
+                let player = Players[item.index];                
 
                 if (player.IsBot) {
                     Mara.AttachToPlayer(item.index, processedSettlements, tickOffset);
@@ -181,6 +194,7 @@ export class Mara {
 
     static AttachToPlayer(playerId: number, processedSettlements: Array<Settlement>, tickOffset: number = 0): void {
         Mara.Debug(`Begin attach to player ${playerId}`);
+
         let settlementData = MaraUtils.GetSettlementData(playerId);
 
         if (!settlementData) {
@@ -188,7 +202,7 @@ export class Mara {
         }
 
         if (processedSettlements.find((v) => v == settlementData.Settlement)) {
-            Mara.Info(`Skipping player ${playerId}: settlement is already bound to another controller`);
+            Mara.Info(`Skipping player ${playerId}: settlement is already bound to another controller or controlled by human player`);
             return;
         }
 
