@@ -33,10 +33,6 @@ export class MaraResources {
         this.resources.set(MaraResourceType.People, value);
     }
 
-    public get Resources(): Map<MaraResourceType, number> {
-        return this.resources;
-    }
-
     private resources = new Map<MaraResourceType, number>();
 
     constructor(wood: number, metal: number, gold: number, people: number) {
@@ -55,7 +51,7 @@ export class MaraResources {
         
         this.resources.forEach(
             (amount, type) => {
-                let otherAmount = other.Resources.get(type)!;
+                let otherAmount = other.resources.get(type)!;
 
                 if (otherAmount > amount) {
                     result = false;
@@ -94,6 +90,34 @@ export class MaraResources {
             this.Gold,
             this.People
         );
+    }
+
+    public Normalize(): MaraResources {
+        let maxAmount = 0;
+
+        this.resources.forEach(
+            (amount, type) => {
+                if (amount > maxAmount) {
+                    maxAmount = amount;
+                }
+            }
+        );
+
+        let result = new MaraResources(0, 0, 0, 0);
+
+        if (maxAmount == 0) {
+            return result;
+        }
+        
+        let newResources = result.resources;
+
+        this.resources.forEach(
+            (amount, type) => {
+                newResources.set(type, amount / maxAmount);
+            }
+        );
+
+        return result;
     }
 
     private doMath(other: MaraResources, sign: number): void { // need to come up with better name...

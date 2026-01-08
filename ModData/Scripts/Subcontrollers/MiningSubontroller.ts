@@ -273,7 +273,7 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
     }
 
     protected onTaskSuccess(tickNumber: number): void {
-        this.nextTaskAttemptTick = tickNumber
+        this.nextTaskAttemptTick = tickNumber;
     }
 
     protected onTaskFailure(tickNumber: number): void {
@@ -571,8 +571,6 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
         this.Debug(`Current resources: ${resources.ToString()}`);
         this.Debug(`Requested resources: ${requestedResources.ToString()}`);
 
-        let producedResources = this.getProducedResources();
-
         let result = new NeedExpandResult();
         result.NeedExpand = false;
         result.ResourcesToMine = new MaraResources(0, 0, 0, 0);
@@ -581,7 +579,6 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
         let minResourceToThresholdRatio = Infinity;
 
         //TODO: rewrite code below to get rid of certain resource names
-        //TODO: also go to expand if currently not mining some resource
 
         let peopleThreshold = Math.max(this.PEOPLE_THRESHOLD, requestedResources.People);
         let woodThreshold = Math.max(this.RESOURCE_THRESHOLD, requestedResources.Wood);
@@ -639,6 +636,8 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
         if (result.NeedExpand) {
             return result;
         }
+
+        let producedResources = this.getProducedResources();
 
         if (!producedResources.has(MaraResourceType.People)) {
             this.Debug(`Not producing people`);
@@ -805,8 +804,12 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
         let requiredMetal = requiredResources.Metal;
         let requiredWood = requiredResources.Wood;
 
+        let normalizedResources = requiredResources.Copy();
+        normalizedResources.People = 0;
+        normalizedResources = normalizedResources.Normalize();
+
         MaraMap.ResourceClusters.forEach((value) => {
-            if (requiredGold > 0) {
+            if (normalizedResources.Gold == 1) {
                 let freeGold = this.getUnoccupiedMinerals(value.GoldCells);
                 
                 if (freeGold > requiredGold && this.canPlaceMine(value, MaraResourceType.Gold)) {
@@ -815,7 +818,7 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
                 }
             }
             
-            if (requiredMetal > 0) {
+            if (normalizedResources.Metal == 1) {
                 let freeMetal = this.getUnoccupiedMinerals(value.MetalCells);
                 
                 if (freeMetal > requiredMetal && this.canPlaceMine(value, MaraResourceType.Metal)) {
@@ -824,7 +827,7 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
                 }
             }
             
-            if (requiredWood > 0 && value.WoodAmount >= requiredWood) {
+            if (normalizedResources.Wood == 1 && value.WoodAmount >= requiredWood) {
                 if (this.isFreeWoodcuttingCluster(value)) {
                     candidates.push(value);
                     return;
