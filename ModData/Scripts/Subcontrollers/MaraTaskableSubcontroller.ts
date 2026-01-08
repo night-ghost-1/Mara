@@ -67,6 +67,9 @@ export abstract class MaraTaskableSubcontroller extends MaraSubcontroller {
                 if (selfTask) {
                     this.AddTask(selfTask);
                 }
+                else {
+                    this.nextTaskAttemptTick = tickNumber + 50 * 60; // 1 min
+                }
             }
         }
 

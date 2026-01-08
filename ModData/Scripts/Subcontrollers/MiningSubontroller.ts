@@ -256,6 +256,20 @@ export class MiningSubcontroller extends MaraTaskableSubcontroller {
         return result;
     }
 
+    public HasExcessResources(): boolean {
+        let requestedResources = new MaraResources(0, 0, 0, 0,);
+        
+        this.resourceRequests.forEach(
+            (value, key) => requestedResources.Add(value.RequestedResources)
+        );
+
+        requestedResources = requestedResources.Multiply(2); // empiric coefficient
+
+        let stashedResourses = this.GetStashedResourses();
+
+        return stashedResourses.IsGreaterOrEquals(requestedResources);
+    }
+
     protected doRoutines(tickNumber: number): void {
         if (tickNumber % 50 != 0) {
             return;

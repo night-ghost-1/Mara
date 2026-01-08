@@ -9,11 +9,16 @@ import { DefenceBuildTask } from "../SettlementSubcontrollerTasks/DevelopmentSub
 
 export class DevelopmentSubcontroller extends MaraTaskableSubcontroller {
     protected onTaskSuccess(tickNumber: number): void {
-        this.nextTaskAttemptTick = tickNumber + MaraUtils.Random(
-            this.settlementController.MasterMind,
-            this.settlementController.Settings.Timeouts.SettlementEnhanceMaxCooldown,
-            this.settlementController.Settings.Timeouts.SettlementEnhanceMinCooldown
-        );
+        if (this.settlementController.MiningController.HasExcessResources()) {
+            this.nextTaskAttemptTick = 0;
+        }
+        else {
+            this.nextTaskAttemptTick = tickNumber + MaraUtils.Random(
+                this.settlementController.MasterMind,
+                this.settlementController.Settings.Timeouts.SettlementEnhanceMaxCooldown,
+                this.settlementController.Settings.Timeouts.SettlementEnhanceMinCooldown
+            );
+        }
     }
 
     protected onTaskFailure(tickNumber: number): void {
