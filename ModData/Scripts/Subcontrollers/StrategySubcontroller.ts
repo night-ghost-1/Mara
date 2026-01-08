@@ -61,10 +61,11 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
 
     private globalStrategy: SettlementGlobalStrategy = new SettlementGlobalStrategy();
     private globalStrategyReInitTick: number;
+    private alliedSettlements: Array<Settlement> = [];
     
     constructor (parent: MaraSettlementController) {
         super(parent);
-        this.updateEnemiesList();
+        this.updateDiplomacy();
 
         this.globalStrategyReInitTick = -Infinity;
         this.reinitGlobalStrategy(0); //global strategy must be inited on the first tick
@@ -454,17 +455,25 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
             );
 
             let totalEnemyStrength = 0;
+            let isAlliedBuildingsPresent = false;
 
             for (let unit of units) {
                 if (this.EnemySettlements.find((value) => {return value == unit.UnitOwner})) {
                     totalEnemyStrength += MaraUtils.GetUnitStrength(unit);
                 }
-                else {
-                    continue;
+                else if (
+                    MaraUtils.IsBuildingConfigId(unit.UnitCfgId) &&
+                    this.alliedSettlements.find((value) => {return value == unit.UnitOwner})
+                ) {
+                    isAlliedBuildingsPresent = true;
+                    break;
                 }
             }
 
-            if (totalEnemyStrength == 0 || canAttack) {
+            if (
+                !isAlliedBuildingsPresent &&
+                (totalEnemyStrength == 0 || canAttack)
+            ) {
                 distance += totalEnemyStrength / 10;
 
                 let path = MaraMap.GetShortestPath(settlementCenter!, cluster.Center);
@@ -554,7 +563,7 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
 
     protected doRoutines(tickNumber: number): void {
         if (tickNumber % 50 == 0) {
-            this.updateEnemiesList();
+            this.updateDiplomacy();
             this.reinitGlobalStrategy(tickNumber);
 
             let isBaseDefendTaskPresent = this.AllTasks.find((t) => t.constructor.name == MainBaseDefendTask.name) != undefined;
@@ -707,12 +716,19 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
         return this.makeCombatUnitComposition(allowedOffensiveCfgItems, requiredStrength);
     }
 
-    private updateEnemiesList(): void {
+    private updateDiplomacy(): void {
         let diplomacy = this.settlementController.Settlement.Diplomacy;
         let settlements = MaraUnitCache.AllSettlements;
+        
         this.EnemySettlements = settlements.filter(
             (value) => {
                 return diplomacy.IsWarStatus(value) && MaraUnitCache.GetAllSettlementUnits(value).length > 0
+            }
+        );
+
+        this.alliedSettlements = settlements.filter(
+            (value) => {
+                return diplomacy.IsAllianceStatus(value) && MaraUnitCache.GetAllSettlementUnits(value).length > 0
             }
         );
     }
