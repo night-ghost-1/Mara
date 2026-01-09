@@ -40,6 +40,7 @@ export class MaraPlugin extends HordePluginBase {
 
     public onFirstRun() {
         this.log.logLevel = LogLevel.Info;
+        //this.log.logLevel = LogLevel.Debug;
         this.isReproducingMode = Battle.IsBotReproducingMode;
 
         let playerNames = MaraUtils.ShuffleArray(new Array(...MaraPlugin.playerNames));
