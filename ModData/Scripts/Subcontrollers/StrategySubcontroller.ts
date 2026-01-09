@@ -722,7 +722,11 @@ export class StrategySubcontroller extends MaraTaskableSubcontroller {
         
         this.EnemySettlements = settlements.filter(
             (value) => {
-                return diplomacy.IsWarStatus(value) && MaraUnitCache.GetAllSettlementUnits(value).length > 0
+                return (
+                    diplomacy.IsWarStatus(value) && 
+                    MaraUnitCache.GetAllSettlementUnits(value).length > 0 &&
+                    !value.StandAlone.IsStandAlone
+                )
             }
         );
 
