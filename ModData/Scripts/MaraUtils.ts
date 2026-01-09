@@ -21,6 +21,7 @@ import { MaraUnitCacheItem } from "./Common/Cache/MaraUnitCacheItem";
 import { ListT } from "library/dotnet/dotnet-types";
 import { PathFinder } from "library/game-logic/path-find";
 import { IMaraPoint } from "./Common/IMaraPoint";
+import { MaraResources } from "./Common/MapAnalysis/MaraResources";
 
 const DEFAULT_UNIT_SEARCH_RADIUS = 3;
 
@@ -235,7 +236,7 @@ export class MaraUtils {
     static GetSettlementUnitsAroundPoint(
         point: MaraPoint,
         radius: number,
-        settelements?: Array<Settlement>,
+        settelements?: Array<Settlement> | null,
         unitFilter?: (unit: MaraUnitCacheItem) => boolean,
         includeUnalive?: boolean,
         includeBlocking?: boolean
@@ -251,7 +252,7 @@ export class MaraUtils {
     
     static GetSettlementUnitsInArea(
         rect: MaraRect,
-        settelements?: Array<Settlement>,
+        settelements?: Array<Settlement> | null,
         unitFilter?: (unit: MaraUnitCacheItem) => boolean,
         includeUnalive?: boolean,
         includeBlocking?: boolean
@@ -1205,6 +1206,21 @@ export class MaraUtils {
 
     private static configGrassSpeed(unitConfig: UnitConfig): number {
         return unitConfig.Speeds.Item.get(TileType.Grass)!
+    }
+
+    static GetConfigIdProductionCost(cfgId: string): MaraResources {
+        return MaraUnitConfigCache.GetConfigProperty(cfgId, MaraUtils.configIdProductionCost, "productionCost") as MaraResources;
+    }
+
+    private static configIdProductionCost(unitConfig: UnitConfig): MaraResources {
+        let cost = unitConfig.CostResources;
+
+        return new MaraResources(
+            cost.Lumber, 
+            cost.Metal, 
+            cost.Gold, 
+            cost.People
+        );
     }
     //#endregion
     

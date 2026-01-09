@@ -15,6 +15,7 @@ import { MaraProductionRequest } from "../Common/MaraProductionRequest";
 import SortedSet from "../Common/SortedSet.js";
 import InsertConflictResolvers from "../Common/SortedSet/InsertConflictResolvers.js"
 import { MaraPriority } from "../Common/MaraPriority";
+import { MaraPoint } from "../Common/MaraPoint";
 
 type MotionBuildSelf = HordeClassLibrary.UnitComponents.OrdersSystem.Motions.Producing.MotionBuildSelf;
 
@@ -94,6 +95,7 @@ export class ProductionSubcontroller extends MaraSubcontroller {
 
         if (tickNumber % 50 == 0) {
             this.cleanupUnfinishedBuildings(tickNumber);
+            this.cleanupBlockedBuildings();
             
             let repairZones = this.getRepairZones();
             this.cleanupRepairRequests(repairZones);
@@ -379,6 +381,93 @@ export class ProductionSubcontroller extends MaraSubcontroller {
                 }
             }
         }
+    }
+
+    private cleanupBlockedBuildings(): void {
+        let allUnits = MaraUtils.GetAllSettlementUnits(this.settlementController.Settlement);
+        let blockableBuildings = allUnits.filter(
+            (u) => {
+                if (!MaraUtils.IsBuildingConfigId(u.UnitCfgId)) {
+                    return false;
+                }
+
+                let buildingConfig = MaraUtils.GetUnitConfig(u.UnitCfgId);
+                
+                if (buildingConfig.BuildingConfig.EmergePoint) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        );
+
+        let blockedBuildingsData = new Map<number, Array<MaraUnitCacheItem>>();
+        
+        for (let building of blockableBuildings) {
+            let buildingConfig = MaraUtils.GetUnitConfig(building.UnitCfgId);
+
+            let emergePoint = new MaraPoint(
+                buildingConfig.BuildingConfig.EmergePoint!.X,
+                buildingConfig.BuildingConfig.EmergePoint!.Y
+            );
+
+            let emergePointShifted = emergePoint.Shift(building.UnitCell);
+            
+            let blockingBuilding = MaraUtils.GetSettlementUnitsAroundPoint(
+                emergePointShifted,
+                0,
+                null,
+                (u) => MaraUtils.IsBuildingConfigId(u.UnitCfgId) && !MaraUtils.IsWalkableConfigId(u.UnitCfgId),
+                false,
+                true
+            )[0];
+
+            if (blockingBuilding) {
+                let existingData = blockedBuildingsData.get(blockingBuilding.UnitId);
+
+                if (existingData) {
+                    existingData.push(building);
+                }
+                else {
+                    blockedBuildingsData.set(blockingBuilding.UnitId, [building]);
+                }
+            }
+        }
+
+        blockedBuildingsData.forEach(
+            (value, key) => {
+                let blockingBuilding = MaraUnitCache.GetUnitById(key);
+
+                if (!blockingBuilding) {
+                    return;
+                }
+
+                if (blockingBuilding.UnitOwner == this.settlementController.Settlement) {
+                    let blockingBuildingCost = MaraUtils.GetConfigIdProductionCost(blockingBuilding.UnitCfgId).Copy();
+                    let blockedBuildingsCost = new MaraResources(0, 0, 0, 0);
+
+                    for (let blockedBuilding of value) {
+                        let buildingCost = MaraUtils.GetConfigIdProductionCost(blockedBuilding.UnitCfgId).Copy();
+                        blockedBuildingsCost.Add(buildingCost);
+                    }
+
+                    // purposely zeroing-out people since it results in more natural comparison
+                    blockedBuildingsCost.People = 0;
+                    blockingBuildingCost.People = 0;
+
+                    if (blockedBuildingsCost.IsGreaterOrEquals(blockingBuildingCost)) {
+                        MaraUtils.IssueSelfDestructCommand([blockingBuilding], this.settlementController.Player);
+                    }
+                    else {
+                        MaraUtils.IssueSelfDestructCommand(value, this.settlementController.Player);
+                    }
+                }
+                else {
+                    MaraUtils.IssueSelfDestructCommand(value, this.settlementController.Player);
+                }
+            }
+        )
     }
 
     private repairUnits(repairZones: Array<SettlementClusterLocation>): void {
