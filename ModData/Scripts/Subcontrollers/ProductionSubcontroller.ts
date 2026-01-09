@@ -423,7 +423,7 @@ export class ProductionSubcontroller extends MaraSubcontroller {
                 true
             )[0];
 
-            if (blockingBuilding) {
+            if (blockingBuilding && blockingBuilding.UnitId != building.UnitId) {
                 let existingData = blockedBuildingsData.get(blockingBuilding.UnitId);
 
                 if (existingData) {
