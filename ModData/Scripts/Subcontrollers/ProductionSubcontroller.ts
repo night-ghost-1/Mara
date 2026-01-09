@@ -388,7 +388,7 @@ export class ProductionSubcontroller extends MaraSubcontroller {
         
         for (let unit of unitsToRepair) {
             let maxHealth = MaraUtils.GetConfigIdMaxHealth(unit.UnitCfgId);
-            let missingHealth = unit.UnitHealth - maxHealth;
+            let missingHealth = maxHealth - unit.UnitHealth;
 
             let repairPrice = MaraUnitConfigCache.GetConfigProperty(
                 unit.UnitCfgId, 
