@@ -282,10 +282,21 @@ export class ProductionSubcontroller extends MaraSubcontroller {
         }
     }
 
-    IsCfgIdProduceable(cfgId: string): boolean {
+    IsCfgIdProduceable(configId: string): boolean {
         let allProduceableCfgIds = this.GetProduceableCfgIds();
-        
-        return allProduceableCfgIds.findIndex((c) => c == cfgId) >= 0;
+        let currentComposition = this.settlementController.GetCurrentDevelopedEconomyComposition();
+        let productionChain = MaraUtils.GetCfgIdProductionChain(configId, this.settlementController.Settlement);
+
+        for (let cfg of productionChain) {
+            if (
+                allProduceableCfgIds.findIndex((c) => c == cfg.Uid) >= 0 ||
+                (currentComposition.get(cfg.Uid) ?? 0 > 0)
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     SelectConfigIdToProduce(configIds: Array<string>): string | null {
