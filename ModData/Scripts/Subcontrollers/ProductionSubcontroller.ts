@@ -16,6 +16,7 @@ import SortedSet from "../Common/SortedSet.js";
 import InsertConflictResolvers from "../Common/SortedSet/InsertConflictResolvers.js"
 import { MaraPriority } from "../Common/MaraPriority";
 import { MaraPoint } from "../Common/MaraPoint";
+import { ReparableProfessionParams, UnitProfession } from "library/game-logic/unit-professions";
 
 type MotionBuildSelf = HordeClassLibrary.UnitComponents.OrdersSystem.Motions.Producing.MotionBuildSelf;
 
@@ -487,19 +488,21 @@ export class ProductionSubcontroller extends MaraSubcontroller {
         let availableResources = this.settlementController.MiningController.GetStashedResourses();
         
         for (let unit of unitsToRepair) {
-            let maxHealth = MaraUtils.GetConfigIdMaxHealth(unit.UnitCfgId);
-            let missingHealth = maxHealth - unit.UnitHealth;
-
-            let repairPrice = MaraUnitConfigCache.GetConfigProperty(
+            let totalRepairCost = MaraUnitConfigCache.GetConfigProperty(
                 unit.UnitCfgId, 
                 (cfg) => {
-                    let cost = this.settlementController.Settlement.Production.GetOneRepairContributionCost(cfg, 1)
-                    return new MaraResources(cost.Lumber, cost.Metal, cost.Gold, cost.People)
+                    let costPerTick = this.settlementController.Settlement.Production.GetOneRepairContributionCost(cfg, 1);
+                    let totalRepairTime = (cfg.GetProfessionParams(UnitProfession.Reparable) as ReparableProfessionParams).RecoverTime;
+                    
+                    let result = new MaraResources(costPerTick.Lumber, costPerTick.Metal, costPerTick.Gold, costPerTick.People);
+                    return result.Multiply(totalRepairTime);
                 },
-                "configIdRepairPrice"
+                "configIdTotalRepairCost"
             ) as MaraResources;
 
-            let repairCost = repairPrice.Multiply(missingHealth);
+            let maxHealth = MaraUtils.GetConfigIdMaxHealth(unit.UnitCfgId);
+            let missingHealth =  maxHealth - unit.UnitHealth;
+            let repairCost = totalRepairCost.Multiply(missingHealth / maxHealth);
 
             if (availableResources.IsGreaterOrEquals(repairCost)) {
                 let repairer = this.getRepairer();
@@ -511,6 +514,10 @@ export class ProductionSubcontroller extends MaraSubcontroller {
 
                     this.repairRequests.push(repairRequest);
                     this.Debug(`Created repair request: ${repairRequest.ToString()}`);
+
+                    this.Debug(`repair price: ${totalRepairCost.ToString()}`);
+                    this.Debug(`repair cost: ${repairCost.ToString()}`);
+                    this.Debug(`total resources: ${availableResources.ToString()}`);
                 }
             }
         }
